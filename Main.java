@@ -1,6 +1,7 @@
 class Class {
 static void test (){
     System.out.println("Test");
+    System.out.println("1");
 }
 }
 
