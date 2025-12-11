@@ -1,0 +1,15 @@
+{
+  "name": "restaurant-reservation-backend",
+  "version": "1.0.0",
+  "description": "Node.js backend for restaurant reservation system",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [
+    "node",
+    "express"
+  ],
+  "author": "",
+  "license": "ISC"
+}
