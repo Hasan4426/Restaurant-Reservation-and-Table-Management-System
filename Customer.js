@@ -12,8 +12,8 @@ class Customer {
         return new Customer(username, password, email, phone);
     }
 
-    login(inputPassword,inputUsername) {
-    return this.usernameCus === inputUsername && this.passwordCus === inputPassword;
+    login(inputPassword,inputEmail) {
+    return this.email === inputEmail && this.passwordCus === inputPassword;
     }
 }
 

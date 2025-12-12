@@ -22,7 +22,7 @@ function initializeData() {
     tables.push(new Table('T-4', 4, 'ANY'));
     tables.push(new Table('T-5', 8, 'OUTDOOR'));
 
-    managers.push(new Manager('admin', '123456'));
+    managers.push(new Manager('Manager@Eden.org', '12345678'));
 
     console.log(`DataManager initialized with ${tables.length} tables and ${managers.length} manager account.`);
 }
@@ -34,14 +34,14 @@ function saveCustomer(customer) {
 }
 
 //Customer Login
-function findCustomerByUsername(username) {
-    return customers.find(u => u.usernameCus === username);
+function findCustomerByEmail(email) {
+    return customers.find(C => C.email === email);
 }
 
 //Manager Management
-function findManagerByUsername(username) {
+function findManagerByEmail(email) {
     // Finds and returns the manager that matches the username
-    return managers.find(m => m.username === username);
+    return managers.find(m => m.email === email);
 }
 
 //Reservation Management
@@ -157,8 +157,8 @@ module.exports = {
 
     //Management methods
     saveCustomer,
-    findCustomerByUsername,
-    findManagerByUsername,
+    findCustomerByEmail,
+    findManagerByEmail,
 
     //Reservation Management
     saveReservation,

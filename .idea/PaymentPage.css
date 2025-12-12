@@ -18,7 +18,7 @@ body {
    }
 
 /* Semi-transparent container */
-.payment-container {
+.payment-form {
     background-color: rgba(255, 255, 255, 0.15);
     backdrop-filter: blur(15px);
     padding: 60px;

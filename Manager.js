@@ -1,13 +1,14 @@
 class Manager {
 
-    constructor(username, password) {
+    constructor(username, password,email) {
         this.username = username;
         this.password = password;
+        this.email = email;
         this.role = 'Manager';
     }
 
-    login(inputPassword,inputUsername) {
-        return this.password === inputPassword && this.username === inputUsername;
+    login(inputPassword,inputEmail) {
+        return this.password === inputPassword && this.email === inputEmail;
     }
 
 }

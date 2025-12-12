@@ -9,26 +9,26 @@
 <a href="WelcomePage.html" class="home-link">Home</a>
 <h1 class="title">Sign up</h1>
 <div class="blur-shape">
-  <form class="signup-form">
+  <form class="signup-form" method="POST" action="/signup">
 
     <div class="input-wrapper">
-      <input type="email" id="email" placeholder="Email" required>
+      <input type="email" id="email" name="email" placeholder="Email" required>
       <p class="error-message"></p>
     </div>
 
     <div class="input-wrapper">
-      <input type="text" id="username" placeholder="Username" required>
+      <input type="text" id="username" name="username" placeholder="Username" required>
       <p class="error-message"></p>
     </div>
 
     <div class="password-wrapper">
-      <input type="password" placeholder="Password" id="password" required>
+      <input type="password" placeholder="Password" id="password" name="password" required>
       <span class="toggle-password">🙈</span>
       <p class="error-message"></p>
     </div>
 
     <div class="password-wrapper">
-      <input type="password" placeholder="Confirm Password" id="confirmPassword" required minlength="6">
+      <input type="password" placeholder="Confirm Password" id="confirmPassword" name="confirmPassword" required minlength="6">
       <span class="toggle-password">🙈</span>
       <p class="error-message"></p>
     </div>

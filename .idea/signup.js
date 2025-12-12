@@ -20,37 +20,44 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     });
-    form.addEventListener("submit", (e) => {
-                let valid = true;
+// signup.js - Replace the entire form event listener with this:
 
-                // Reset old errors
-                document.querySelectorAll(".error-message").forEach(msg => {
-                    msg.style.visibility = "hidden";
-                    msg.textContent = "";
-                });
+form.addEventListener("submit", (e) => {
+    let valid = true;
 
-                // 1. Check empty fields
-                inputs.forEach(input => {
-                    const errorMsg = input.parentElement.querySelector(".error-message");
-
-                    if (input.value.trim() === "") {
-                        errorMsg.textContent = "This field is required";
-                        errorMsg.style.visibility = "visible";
-                        valid = false;
-                    }
-                });
-
-
-        if (password.value.length < 8) {
-            alert("Password must be at least 8 characters");
-            e.preventDefault();
-            return;
-        }
-
-        if (password.value !== confirmPassword.value) {
-            alert("Passwords do not match!");
-            e.preventDefault();
-        }
-        if (!valid) e.preventDefault();
+    // Reset old errors
+    document.querySelectorAll(".error-message").forEach(msg => {
+        msg.style.visibility = "hidden";
+        msg.textContent = "";
     });
+
+    // 1. Check empty fields
+    inputs.forEach(input => {
+        const errorMsg = input.parentElement.querySelector(".error-message");
+
+        if (input.value.trim() === "") {
+            errorMsg.textContent = "This field is required";
+            errorMsg.style.visibility = "visible";
+            valid = false;
+        }
+    });
+
+    // 2. Check Password Length
+    if (password.value.length < 6) { // Changed check to 6 based on HTML attribute
+        alert("Password must be at least 6 characters");
+        valid = false;
+    }
+
+    // 3. Check Password Match
+    if (password.value !== confirmPassword.value) {
+        alert("Passwords do not match!");
+        valid = false;
+    }
+
+    // If any validation failed, stop the submission to the server
+    if (!valid) {
+        e.preventDefault();
+    }
+    // If 'valid' is true, the default action (submitting to the '/signup' route) will run!
+});
 });
