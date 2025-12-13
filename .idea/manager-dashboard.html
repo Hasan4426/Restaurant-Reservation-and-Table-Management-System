@@ -119,23 +119,6 @@
           font-weight: bold;
         }
 
-        .add-button {
-          background-color: var(--add-button);
-          border: none;
-          color: white;
-          padding: 10px 20px;
-          border-radius: 6px;
-          cursor: pointer;
-          font-size: 16px;
-          font-weight: bold;
-          transition: all 0.3s;
-        }
-
-        .add-button:hover {
-          background-color: #45a049;
-          transform: scale(1.05);
-        }
-
         .search-container {
           margin-bottom: 30px;
           display: none;
@@ -254,6 +237,10 @@
           transition: all 0.3s;
           min-width: 120px;
           text-align: center;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
         }
 
         .reservation-btn:hover {
@@ -647,6 +634,7 @@
           padding: 15px;
           border-radius: 6px;
           border-left: 4px solid var(--reservation-btn);
+          position: relative;
         }
 
         .reservation-header {
@@ -785,6 +773,57 @@
           font-size: 14px;
           line-height: 1.5;
         }
+
+        /* Reservation Edit Button */
+        .reservation-edit-btn {
+          position: absolute;
+          top: 10px;
+          right: 10px;
+          background: none;
+          border: none;
+          color: var(--edit-btn);
+          font-size: 16px;
+          cursor: pointer;
+          padding: 5px;
+          border-radius: 4px;
+          transition: background 0.3s;
+        }
+
+        .reservation-edit-btn:hover {
+          background-color: rgba(255, 193, 7, 0.1);
+        }
+
+        /* Reservation Edit Modal */
+        .reservation-edit-form {
+          max-width: 500px;
+          text-align: left;
+        }
+
+        .reservation-edit-form .form-group {
+          margin-bottom: 15px;
+        }
+
+        .reservation-edit-form .form-row {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 15px;
+          margin-bottom: 15px;
+        }
+
+        .reservation-edit-form select {
+          width: 100%;
+          padding: 10px;
+          background-color: var(--table-row-even);
+          border: 1px solid #444;
+          border-radius: 4px;
+          color: var(--text-color);
+          font-size: 14px;
+        }
+
+        .reservation-edit-form select:focus {
+          outline: none;
+          border-color: var(--accent);
+        }
     </style>
 </head>
 <body>
@@ -808,7 +847,7 @@
     <div id="accountsSection">
         <div class="header">
             <div class="header-title">Customers</div>
-            <button class="add-button" id="addCustomerBtn">+ Add Customer</button>
+            <!-- Removed Add Customer button -->
         </div>
 
         <div class="search-container" id="searchContainer">
@@ -945,7 +984,7 @@
     </div>
 </div>
 
-<!-- Edit Customer Modal -->
+<!-- Edit Customer Modal - Modified to edit only name -->
 <div class="popup-overlay" id="editOverlay">
     <div class="popup">
         <div class="popup-title" id="editAccountName">Edit Customer</div>
@@ -953,10 +992,6 @@
             <div class="form-group">
                 <label for="editCustomerName">Customer Name</label>
                 <input type="text" id="editCustomerName" placeholder="Enter customer name">
-            </div>
-            <div class="form-group">
-                <label for="editCustomerEmail">Email</label>
-                <input type="email" id="editCustomerEmail" placeholder="Enter customer email">
             </div>
             <div class="form-actions">
                 <button class="popup-btn popup-btn-edit" id="saveEditBtn">Save</button>
@@ -1001,6 +1036,55 @@
         </div>
         <div class="popup-buttons">
             <button class="popup-btn popup-btn-cancel" id="closeReportBtn">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- Reservation Edit Modal -->
+<div class="popup-overlay" id="reservationEditOverlay">
+    <div class="popup">
+        <div class="popup-title" id="reservationEditTitle">Edit Reservation</div>
+        <div class="reservation-edit-form">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="editReservationDate">Date</label>
+                    <input type="text" id="editReservationDate" placeholder="e.g., Friday, March 15, 2024">
+                </div>
+                <div class="form-group">
+                    <label for="editReservationTime">Time</label>
+                    <input type="text" id="editReservationTime" placeholder="e.g., 19:30">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="editReservationPartySize">Party Size</label>
+                    <input type="number" id="editReservationPartySize" placeholder="Number of people" min="1" max="20">
+                </div>
+                <div class="form-group">
+                    <label for="editReservationTable">Table</label>
+                    <input type="text" id="editReservationTable" placeholder="e.g., Table 5">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="editReservationStatus">Status</label>
+                <select id="editReservationStatus">
+                    <option value="confirmed">Confirmed</option>
+                    <option value="pending">Pending</option>
+                    <option value="cancelled">Cancelled</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="editReservationSpecialRequests">Special Requests</label>
+                <input type="text" id="editReservationSpecialRequests" placeholder="Any special requests...">
+            </div>
+            <div class="form-group">
+                <label for="editReservationContactPhone">Contact Phone</label>
+                <input type="text" id="editReservationContactPhone" placeholder="Customer contact phone">
+            </div>
+            <div class="form-actions">
+                <button class="popup-btn popup-btn-edit" id="saveReservationEditBtn">Save</button>
+                <button class="popup-btn popup-btn-cancel" id="cancelReservationEditBtn">Cancel</button>
+            </div>
         </div>
     </div>
 </div>
@@ -1191,7 +1275,6 @@
     const editOverlay = document.getElementById('editOverlay');
     const editAccountName = document.getElementById('editAccountName');
     const editCustomerName = document.getElementById('editCustomerName');
-    const editCustomerEmail = document.getElementById('editCustomerEmail');
     const saveEditBtn = document.getElementById('saveEditBtn');
     const cancelEditBtn = document.getElementById('cancelEditBtn');
     const reservationsOverlay = document.getElementById('reservationsOverlay');
@@ -1212,15 +1295,31 @@
     const nextPageBtn = document.getElementById('nextPageBtn');
     const pageInfo = document.getElementById('pageInfo');
     const totalCustomersElement = document.getElementById('totalCustomers');
-    const addCustomerBtn = document.getElementById('addCustomerBtn');
     const todayReservationsElement = document.getElementById('todayReservations');
     const tomorrowReservationsElement = document.getElementById('tomorrowReservations');
+
+    // Reservation edit modal elements
+    const reservationEditOverlay = document.getElementById('reservationEditOverlay');
+    const reservationEditTitle = document.getElementById('reservationEditTitle');
+    const editReservationDate = document.getElementById('editReservationDate');
+    const editReservationTime = document.getElementById('editReservationTime');
+    const editReservationPartySize = document.getElementById('editReservationPartySize');
+    const editReservationTable = document.getElementById('editReservationTable');
+    const editReservationStatus = document.getElementById('editReservationStatus');
+    const editReservationSpecialRequests = document.getElementById('editReservationSpecialRequests');
+    const editReservationContactPhone = document.getElementById('editReservationContactPhone');
+    const saveReservationEditBtn = document.getElementById('saveReservationEditBtn');
+    const cancelReservationEditBtn = document.getElementById('cancelReservationEditBtn');
 
     let membersData = generateMembersData();
     let currentMember = null;
     let currentPage = 1;
     let itemsPerPage = 20;
     let filteredMembers = [];
+    
+    // Variables for reservation editing
+    let currentReservationMember = null;
+    let currentReservation = null;
 
     // Function to update stats
     function updateStats() {
@@ -1292,7 +1391,7 @@
           <td>
             <div class="details-column">
               <button class="reservation-btn" onclick="showReservations(${member.id})">
-                Reservations (${reservationCount})
+                ✏️ Reservations (${reservationCount})
               </button>
               <button class="feedback-btn" onclick="showFeedback(${member.id})">
                 Feedback (${feedbackCount})
@@ -1324,6 +1423,7 @@
             const statusClass = `status-${res.status}`;
             return `
             <div class="reservation-item">
+              <button class="reservation-edit-btn" onclick="editReservation(${member.id}, ${res.id})" title="Edit Reservation">✏️</button>
               <div class="reservation-header">
                 <div class="reservation-date">${res.date}</div>
                 <div class="reservation-status ${statusClass}">${res.status}</div>
@@ -1360,6 +1460,26 @@
         }
 
         reservationsOverlay.style.display = 'flex';
+      }
+    }
+
+    function editReservation(memberId, reservationId) {
+      const member = membersData.find(m => m.id === memberId);
+      if (member) {
+        currentReservationMember = member;
+        const reservation = member.reservations.find(r => r.id === reservationId);
+        if (reservation) {
+          currentReservation = reservation;
+          reservationEditTitle.textContent = `Edit Reservation for ${member.name}`;
+          editReservationDate.value = reservation.date;
+          editReservationTime.value = reservation.time;
+          editReservationPartySize.value = reservation.partySize;
+          editReservationTable.value = reservation.table;
+          editReservationStatus.value = reservation.status;
+          editReservationSpecialRequests.value = reservation.specialRequests || '';
+          editReservationContactPhone.value = reservation.contactPhone;
+          reservationEditOverlay.style.display = 'flex';
+        }
       }
     }
 
@@ -1401,7 +1521,6 @@
         currentMember = member;
         editAccountName.textContent = `Edit ${member.name}`;
         editCustomerName.value = member.name;
-        editCustomerEmail.value = member.email;
         editOverlay.style.display = 'flex';
       }
     }
@@ -1479,32 +1598,6 @@
       }
     }
 
-    // Add new customer function
-    function addNewCustomer() {
-      const name = prompt("Enter customer name:");
-      if (!name || name.trim() === '') {
-        alert("Customer name is required!");
-        return;
-      }
-
-      const email = prompt("Enter customer email:", `${name.toLowerCase().replace(' ', '.')}@example.com`);
-
-      const newCustomer = {
-        id: membersData.length + 1,
-        name: name.trim(),
-        email: email ? email.trim() : '',
-        phone: '',
-        reservations: [],
-        feedback: [],
-        notes: '',
-        joinDate: new Date().toLocaleDateString()
-      };
-
-      membersData.push(newCustomer);
-      renderMembersTable();
-      alert(`Customer ${name} added successfully!`);
-    }
-
     // Event listeners for delete modal
     confirmDeleteBtn.addEventListener('click', () => {
       if (currentMember) {
@@ -1528,17 +1621,12 @@
     saveEditBtn.addEventListener('click', () => {
       if (currentMember) {
         const newName = editCustomerName.value.trim();
-        const newEmail = editCustomerEmail.value.trim();
-
+        
         if (newName && newName !== '') {
           currentMember.name = newName;
+          renderMembersTable();
+          alert(`Customer information updated`);
         }
-        if (newEmail && newEmail !== '') {
-          currentMember.email = newEmail;
-        }
-
-        renderMembersTable();
-        alert(`Customer information updated`);
       }
       editOverlay.style.display = 'none';
       currentMember = null;
@@ -1547,6 +1635,28 @@
     cancelEditBtn.addEventListener('click', () => {
       editOverlay.style.display = 'none';
       currentMember = null;
+    });
+
+    // Event listener for reservation edit modal
+    saveReservationEditBtn.addEventListener('click', () => {
+      if (currentReservationMember && currentReservation) {
+        currentReservation.date = editReservationDate.value;
+        currentReservation.time = editReservationTime.value;
+        currentReservation.partySize = parseInt(editReservationPartySize.value);
+        currentReservation.table = editReservationTable.value;
+        currentReservation.status = editReservationStatus.value;
+        currentReservation.specialRequests = editReservationSpecialRequests.value;
+        currentReservation.contactPhone = editReservationContactPhone.value;
+        
+        // Refresh the reservations modal to show updated data
+        showReservations(currentReservationMember.id);
+        reservationEditOverlay.style.display = 'none';
+        alert('Reservation updated successfully!');
+      }
+    });
+
+    cancelReservationEditBtn.addEventListener('click', () => {
+      reservationEditOverlay.style.display = 'none';
     });
 
     // Event listeners for reservations modal
@@ -1597,8 +1707,11 @@
       }
     });
 
-    // Add customer button event
-    addCustomerBtn.addEventListener('click', addNewCustomer);
+    reservationEditOverlay.addEventListener('click', (e) => {
+      if (e.target === reservationEditOverlay) {
+        reservationEditOverlay.style.display = 'none';
+      }
+    });
 
     // Filter event listeners
     nameFilter.addEventListener('input', () => {
