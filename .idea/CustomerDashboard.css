@@ -146,7 +146,10 @@ top-bar, header {
 .header-buttons {
     display: flex;
     gap: 15px;          /* space between buttons */
-    margin-left: auto;   /* pushes buttons to right */
+    margin-left: auto;
+    text-decoration: none;
+    display: inline-block;   /* important for <a> */
+
 }
 
 /* Dashboard buttons */
@@ -160,6 +163,8 @@ top-bar, header {
     border-radius: 8px; /* slightly curved edges */
     cursor: pointer;
     transition: 0.3s ease;
+    text-decoration: none;
+        display: inline-block;
 }
 
 .dashboard-btn:hover {
@@ -283,6 +288,8 @@ transform: translateY(-5px);
     border-radius: 12px;        /* curved edges */
     cursor: pointer;
     transition: 0.3s ease, transform 0.3s ease;
+    text-decoration: none !important;
+    text-align: center;
 }
 
 .feedback-btn:hover {
