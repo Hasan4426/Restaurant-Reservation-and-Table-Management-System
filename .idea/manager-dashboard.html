@@ -21,6 +21,7 @@
           --feedback-btn: #4CAF50;
           --edit-btn: #FFC107;
           --add-button: #4CAF50;
+          --cancel-btn: #f44336;
         }
 
         body {
@@ -403,6 +404,7 @@
           display: flex;
           gap: 15px;
           justify-content: center;
+          flex-wrap: wrap;
         }
 
         .popup-btn {
@@ -443,6 +445,15 @@
 
         .popup-btn-cancel:hover {
           background-color: #777;
+        }
+
+        .popup-btn-cancel-reservation {
+          background-color: var(--cancel-btn);
+          color: white;
+        }
+
+        .popup-btn-cancel-reservation:hover {
+          background-color: #d32f2f;
         }
 
         .reports-section {
@@ -738,6 +749,7 @@
           justify-content: flex-end;
           gap: 10px;
           margin-top: 20px;
+          flex-wrap: wrap;
         }
 
         /* Feedback Modal */
@@ -823,6 +835,27 @@
         .reservation-edit-form select:focus {
           outline: none;
           border-color: var(--accent);
+        }
+
+        .current-status-display {
+          padding: 8px 12px;
+          background-color: var(--table-row-even);
+          border-radius: 4px;
+          margin-bottom: 15px;
+          font-weight: bold;
+          text-align: center;
+        }
+
+        .status-confirmed-display {
+          color: #4CAF50;
+        }
+
+        .status-pending-display {
+          color: #FFC107;
+        }
+
+        .status-cancelled-display {
+          color: #f44336;
         }
     </style>
 </head>
@@ -1045,6 +1078,10 @@
     <div class="popup">
         <div class="popup-title" id="reservationEditTitle">Edit Reservation</div>
         <div class="reservation-edit-form">
+            <div id="currentStatusDisplay" class="current-status-display">
+                <!-- Current status will be displayed here -->
+            </div>
+            
             <div class="form-row">
                 <div class="form-group">
                     <label for="editReservationDate">Date</label>
@@ -1082,8 +1119,9 @@
                 <input type="text" id="editReservationContactPhone" placeholder="Customer contact phone">
             </div>
             <div class="form-actions">
-                <button class="popup-btn popup-btn-edit" id="saveReservationEditBtn">Save</button>
-                <button class="popup-btn popup-btn-cancel" id="cancelReservationEditBtn">Cancel</button>
+                <button class="popup-btn popup-btn-edit" id="saveReservationEditBtn">Save Changes</button>
+                <button class="popup-btn popup-btn-cancel-reservation" id="cancelReservationBtn">Cancel Reservation</button>
+                <button class="popup-btn popup-btn-cancel" id="cancelReservationEditBtn">Close</button>
             </div>
         </div>
     </div>
@@ -1301,6 +1339,7 @@
     // Reservation edit modal elements
     const reservationEditOverlay = document.getElementById('reservationEditOverlay');
     const reservationEditTitle = document.getElementById('reservationEditTitle');
+    const currentStatusDisplay = document.getElementById('currentStatusDisplay');
     const editReservationDate = document.getElementById('editReservationDate');
     const editReservationTime = document.getElementById('editReservationTime');
     const editReservationPartySize = document.getElementById('editReservationPartySize');
@@ -1309,6 +1348,7 @@
     const editReservationSpecialRequests = document.getElementById('editReservationSpecialRequests');
     const editReservationContactPhone = document.getElementById('editReservationContactPhone');
     const saveReservationEditBtn = document.getElementById('saveReservationEditBtn');
+    const cancelReservationBtn = document.getElementById('cancelReservationBtn');
     const cancelReservationEditBtn = document.getElementById('cancelReservationEditBtn');
 
     let membersData = generateMembersData();
@@ -1471,6 +1511,12 @@
         if (reservation) {
           currentReservation = reservation;
           reservationEditTitle.textContent = `Edit Reservation for ${member.name}`;
+          
+          // Update current status display
+          const statusText = reservation.status.charAt(0).toUpperCase() + reservation.status.slice(1);
+          currentStatusDisplay.innerHTML = `Current Status: <span class="status-${reservation.status}-display">${statusText}</span>`;
+          
+          // Fill form fields
           editReservationDate.value = reservation.date;
           editReservationTime.value = reservation.time;
           editReservationPartySize.value = reservation.partySize;
@@ -1478,6 +1524,7 @@
           editReservationStatus.value = reservation.status;
           editReservationSpecialRequests.value = reservation.specialRequests || '';
           editReservationContactPhone.value = reservation.contactPhone;
+          
           reservationEditOverlay.style.display = 'flex';
         }
       }
@@ -1598,6 +1645,40 @@
       }
     }
 
+    // Function to cancel a reservation
+    function cancelReservation() {
+      if (currentReservationMember && currentReservation) {
+        // Set status to cancelled
+        currentReservation.status = 'cancelled';
+        editReservationStatus.value = 'cancelled';
+        
+        // Update status display
+        currentStatusDisplay.innerHTML = `Current Status: <span class="status-cancelled-display">Cancelled</span>`;
+        
+        // Save the change
+        saveReservationChanges();
+        
+        alert('Reservation has been cancelled!');
+      }
+    }
+
+    // Function to save reservation changes
+    function saveReservationChanges() {
+      if (currentReservationMember && currentReservation) {
+        currentReservation.date = editReservationDate.value;
+        currentReservation.time = editReservationTime.value;
+        currentReservation.partySize = parseInt(editReservationPartySize.value);
+        currentReservation.table = editReservationTable.value;
+        currentReservation.status = editReservationStatus.value;
+        currentReservation.specialRequests = editReservationSpecialRequests.value;
+        currentReservation.contactPhone = editReservationContactPhone.value;
+        
+        // Refresh the reservations modal to show updated data
+        showReservations(currentReservationMember.id);
+        reservationEditOverlay.style.display = 'none';
+      }
+    }
+
     // Event listeners for delete modal
     confirmDeleteBtn.addEventListener('click', () => {
       if (currentMember) {
@@ -1637,23 +1718,14 @@
       currentMember = null;
     });
 
-    // Event listener for reservation edit modal
+    // Event listener for reservation edit save button
     saveReservationEditBtn.addEventListener('click', () => {
-      if (currentReservationMember && currentReservation) {
-        currentReservation.date = editReservationDate.value;
-        currentReservation.time = editReservationTime.value;
-        currentReservation.partySize = parseInt(editReservationPartySize.value);
-        currentReservation.table = editReservationTable.value;
-        currentReservation.status = editReservationStatus.value;
-        currentReservation.specialRequests = editReservationSpecialRequests.value;
-        currentReservation.contactPhone = editReservationContactPhone.value;
-        
-        // Refresh the reservations modal to show updated data
-        showReservations(currentReservationMember.id);
-        reservationEditOverlay.style.display = 'none';
-        alert('Reservation updated successfully!');
-      }
+      saveReservationChanges();
+      alert('Reservation updated successfully!');
     });
+
+    // Event listener for cancel reservation button
+    cancelReservationBtn.addEventListener('click', cancelReservation);
 
     cancelReservationEditBtn.addEventListener('click', () => {
       reservationEditOverlay.style.display = 'none';
