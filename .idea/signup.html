@@ -9,7 +9,7 @@
 <a href="WelcomePage.html" class="home-link">Home</a>
 <h1 class="title">Sign up</h1>
 <div class="blur-shape">
-  <form class="signup-form" method="POST" action="/signup">
+  <form class="signup-form" >
 
     <div class="input-wrapper">
       <input type="email" id="email" name="email" placeholder="Email" required>
@@ -40,6 +40,7 @@
       <img src="images/google.png" alt="Google" class="social-icon">
       <img src="images/facebook.png" alt="Facebook" class="social-icon">
     </div>
+    <p id="server-error" class="error-message" style="visibility:hidden; text-align:center;"></p>
 
     <div class="button-container">
       <button type="submit" class="box-button full-width">Sign Up</button>

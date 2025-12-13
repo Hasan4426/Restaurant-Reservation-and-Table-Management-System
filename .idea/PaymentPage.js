@@ -1,42 +1,56 @@
 document.addEventListener('DOMContentLoaded', () => {
     const paymentForm = document.getElementById('payment-form');
+    const cardInput = document.getElementById('card-number');
+    const secureKeyInput = document.getElementById('secure-key');
+    const expiryDateInput = document.getElementById('expiration-date');
+
+    // Auto-format card number (add spaces every 4 digits)
+    cardInput.addEventListener('input', () => {
+        let value = cardInput.value.replace(/\D/g, ''); // remove non-digits
+        value = value.substring(0, 16); // limit to 16 digits
+
+        // add spaces every 4 digits
+        const formatted = value.replace(/(.{4})/g, '$1 ').trim();
+        cardInput.value = formatted;
+    });
 
     paymentForm.addEventListener('submit', (e) => {
-        e.preventDefault(); // prevent default submission
+        e.preventDefault();
 
-        const cardNumber = document.getElementById('card-number').value.trim();
-        const secureKey = document.getElementById('secure-key').value.trim();
-        const expiryDate = document.getElementById('expiry-date').value.trim();
+        // Remove spaces before validation
+        const cardNumber = cardInput.value.replace(/\s/g, '');
+        const secureKey = secureKeyInput.value.trim();
+        const expiryDate = expiryDateInput.value.trim();
 
-        // Validate fields
+        // Empty check
         if (!cardNumber || !secureKey || !expiryDate) {
-            alert("Please fill in all required fields before paying.");
-            return false;
+            alert("Please fill in all required fields.");
+            return;
         }
 
-        // Credit Card Number: must be 16 digits
-        const cardRegex = /^[0-9]{16}$/;
-        if (!cardRegex.test(cardNumber)) {
-            alert("Please enter a valid 16-digit credit card number.");
-            return false;
+        // Card number: exactly 16 digits (spaces ignored)
+        if (!/^\d{16}$/.test(cardNumber)) {
+            alert("Credit card number must be 16 digits.");
+            return;
         }
 
-        // Secure Key: must be 3 digits
-        const secureKeyRegex = /^[0-9]{3}$/;
-        if (!secureKeyRegex.test(secureKey)) {
-            alert("Please enter a valid 3-digit secure key.");
-            return false;
+        // Secure key: exactly 3 digits
+        if (!/^\d{3}$/.test(secureKey)) {
+            alert("Secure key must be 3 digits.");
+            return;
         }
 
-        // Expiration Date: must not be empty (optional: you can check if it's in the future)
-        if (!expiryDate) {
-            alert("Please enter the expiration date.");
-            return false;
+        // Optional: expiration date validation
+        const today = new Date();
+        const selectedDate = new Date(expiryDate);
+
+        if (selectedDate < today) {
+            alert("Card is expired.");
+            return;
         }
 
-        // All validation passed, you can now proceed with payment
+        // Success
         alert("Payment information valid! Processing payment...");
-        // You can then redirect or process payment
         // window.location.href = "SuccessPage.html";
     });
 });
