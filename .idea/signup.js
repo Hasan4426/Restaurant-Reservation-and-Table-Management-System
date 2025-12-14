@@ -64,11 +64,13 @@ document.addEventListener("DOMContentLoaded", () => {
             const response = await fetch("/signup", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    email: email.value.trim(),
-                    username: username.value.trim(),
-                    password: password.value.trim()
-                })
+               body: JSON.stringify({
+                   email: email.value.trim(),
+                   username: username.value.trim(),
+                   password: password.value.trim(),
+                   confirmPassword: confirmPassword.value.trim()
+               })
+
             });
 
             const data = await response.json();

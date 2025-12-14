@@ -23,7 +23,7 @@ app.use(session({
 // Import the modules we created
 const DataManager = require('./DataManager');
 const Customer = require('./Customer'); // Import the Customer class
-
+const Payment = require('./Payment');
 
 // Middleware to read data from forms
 app.use(express.json());
@@ -49,31 +49,37 @@ DataManager.initializeData();
 // CUSTOMER SIGN UP ROUTE
 // =======================================================
 app.post('/signup', (req, res) => {
-    // 1. Extract data from the form
+    // 1. Extract data from the request body
     const { email, username, password, confirmPassword } = req.body;
 
-    // Quick server-side validation (Server-side validation is CRITICAL)
+    // 2. Server-side validation
     if (!email || !username || !password || password !== confirmPassword) {
-        // A simple error message, you can improve this later
-        return res.send("Registration failed: Missing data or passwords do not match.");
+        return res.status(400).json({
+            message: "Registration failed: Missing data or passwords do not match."
+        });
     }
 
-    // 2. Check if a customer with this username already exists
+    // 3. Check if a customer with this email already exists
     const existingCustomer = DataManager.findCustomerByEmail(email);
     if (existingCustomer) {
         console.log(`Signup failed: Email ${email} already used.`);
-        return res.send("This Email is already in use. Please choose another.");
+        return res.status(409).json({
+            message: "This email is already in use. Please choose another."
+        });
     }
 
-    // 3. Create and Save the new Customer Object
+    // 4. Create and save the new Customer
     const newCustomer = Customer.register(username, password, email, 'N/A');
     DataManager.saveCustomer(newCustomer);
 
     console.log(`SUCCESS: New Customer Registered: ${newCustomer.usernameCus}`);
 
-    // 4. Redirect to the login page after successful registration
-    res.redirect('/login.html');
+    // 5. Send success response (frontend will handle redirect)
+    return res.status(201).json({
+        message: "Signup successful"
+    });
 });
+
 
 // server.js - Add this new route
 
@@ -81,7 +87,7 @@ app.post('/signup', (req, res) => {
 // CUSTOMER LOGIN ROUTE
 // Handles POST requests from the login.html form
 // =======================================================
-app.post('/login', (req, res) => {9
+app.post('/login', (req, res) => {
     // 1. Extract data from the form (using the 'name' attributes: email, password)
     const { email, password } = req.body; // <<< We now look for 'email'
 
