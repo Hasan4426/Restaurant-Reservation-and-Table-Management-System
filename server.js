@@ -130,23 +130,32 @@ app.get('/api/my-reservations', requireLogin, (req, res) => {
 });
 
 // FIXED: Robust Payment Processing
+// server.js
+
+// ... (existing code)
+
+// server.js
+
 app.post('/process-payment', requireLogin, (req, res) => {
     const customerId = req.session.userId;
 
-    // Find latest PENDING reservation
+    // Find latest PENDING reservation for this user
     const reservation = DataManager.getAllReservations()
         .filter(r => r.customerId === customerId && r.status === 'PENDING')
         .pop();
 
     if (reservation) {
-        reservation.status = 'CONFIRMED'; // Actual logic update
+        reservation.status = 'CONFIRMED';
+
         const depositAmount = parseFloat(req.body.depositAmount) || 500;
         DataManager.savePayment(new Payment(reservation.reservationId, depositAmount, customerId));
 
-        console.log(`PAYMENT SUCCESS: Reservation ${reservation.reservationId} is CONFIRMED.`);
-        res.redirect('/CustomerDashboard.html');
+        console.log(`PAYMENT SUCCESS: Reservation ${reservation.reservationId} is now CONFIRMED.`);
+
+        // CHANGE: Redirect to the Customer Dashboard instead of WelcomePage
+        res.status(200).json({ success: true, redirect: '/CustomerDashboard.html' });
     } else {
-        res.status(404).send("No pending reservation found.");
+        res.status(404).json({ success: false, message: "No pending reservation found." });
     }
 });
 
