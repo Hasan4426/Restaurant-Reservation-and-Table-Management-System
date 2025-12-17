@@ -3,33 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <title>Book A Table</title>
-    <link rel="stylesheet" href="BookATable.css"></link>
+    <link rel="stylesheet" href="BookATable.css">
 </head>
 <body>
 
 <section class="booking-header">
-<div class="booking-content">
-    <a href="CustomerDashboard.html" class="home-button">Home</a>
-    <h1 class="booking-title">BOOKING</h1>
-    <p class="booking-description">
-        We are delighted to host you for a memorable dining experience.
-        We look forward to welcoming you to our restaurant and creating an unforgettable dining experience for you.
-    </p>
-    <img src="images/img.png" alt="Down Arrow" class="down-arrow">
-</div>
+    <div class="booking-content">
+        <a href="CustomerDashboard.html" class="home-button">Home</a>
+        <h1 class="booking-title">BOOKING</h1>
+        <p class="booking-description">
+            We are delighted to host you for a memorable dining experience.
+            We look forward to welcoming you to our restaurant and creating an unforgettable dining experience for you.
+        </p>
+        <img src="images/img.png" alt="Down Arrow" class="down-arrow">
+    </div>
 </section>
 
 <section class="deposit-section">
     <div class="deposit-content">
         <p class="deposit-text">
-            In order to secure your reservation, we kindly request a deposit of  500 EGP
+            In order to secure your reservation, we kindly request a deposit of 500 EGP
         </p>
         <p class="deposit-subtext">
             The deposit serves as a confirmation of your booking and will be deducted from your final bill
         </p>
 
-
-        <form class="form-container" id="booking-form" >
+        <form class="booking-form" id="booking-form">
             <div class="large-box">
                 <p class="form-instruction">
                     Once you have completed the form below with the necessary details, you will be automatically redirected to our secure payment window.
@@ -38,22 +37,22 @@
                 <div class="two-boxes-wrapper">
                     <div class="input-box">
                         <label for="name">NAME</label>
-                        <input type="text" id="name" placeholder="Your Name">
+                        <input type="text" id="name" placeholder="Your Name" required>
                     </div>
                     <div class="input-box">
                         <label for="surname">SURNAME</label>
-                        <input type="text" id="surname" placeholder="Your Surname">
+                        <input type="text" id="surname" placeholder="Your Surname" required>
                     </div>
                 </div>
 
                 <div class="input-box">
                     <label for="phone">PHONE</label>
-                    <input type="tel" id="phone" name="phone" placeholder="Your Phone Number">
+                    <input type="tel" id="phone" name="phone" placeholder="Your Phone Number" required>
                 </div>
 
                 <div class="input-box">
                     <label for="email">EMAIL</label>
-                    <input type="email" id="email" name="email" placeholder="Your Email">
+                    <input type="email" id="email" name="email" placeholder="Your Email" required>
                 </div>
 
                 <div class="input-box">
@@ -61,10 +60,10 @@
                     <div class="custom-dropdown">
                         <div class="selected placeholder">Choose number of guests</div>
                         <ul class="dropdown-list"></ul>
+                        <input type="hidden" id="guests" name="guests" value="">
                     </div>
                 </div>
 
-                <!-- EVENT & COMMENT -->
                 <div class="two-boxes-wrapper">
                     <div class="input-box">
                         <label for="event">EVENT</label>
@@ -83,15 +82,14 @@
                     </div>
                 </div>
 
-                <!-- DATE & TIME -->
                 <div class="two-boxes-wrapper">
                     <div class="input-box">
                         <label for="date">DATE</label>
-                        <input type="date" id="date" name="date">
+                        <input type="date" id="date" name="date" required>
                     </div>
                     <div class="input-box">
                         <label for="time">TIME</label>
-                        <select id="time" name="time">
+                        <select id="time" name="time" required>
                             <option value="18:00">6:00 PM</option>
                             <option value="19:00">7:00 PM</option>
                             <option value="20:00">8:00 PM</option>
@@ -106,93 +104,18 @@
             </div>
             <p class="thank-you-text">Thank you for choosing us</p>
         </form>
-
-
-
-    </div><div class="contact-us">
-    <img src="images/Call.png" alt="Contact Icon" class="contact-icon">
-    <div class="contact-text">
-        <p class="contact-label">Contact Us</p>
-        <p class="contact-number">+71 111 222 3333</p>
     </div>
-</div>
 
-
+    <div class="contact-us">
+        <img src="images/Call.png" alt="Contact Icon" class="contact-icon">
+        <div class="contact-text">
+            <p class="contact-label">Contact Us</p>
+            <p class="contact-number">+71 111 222 3333</p>
+        </div>
+    </div>
 </section>
-<script>
-    document.addEventListener("DOMContentLoaded", () => {
-        const dropdown = document.querySelector(".custom-dropdown");
-        const selected = dropdown.querySelector(".selected");
-        const list = dropdown.querySelector(".dropdown-list");
 
-        // Generate numbers dynamically
-        for (let i = 1; i <= 20; i++) {
-            let li = document.createElement("li");
-            li.textContent = i;
-            li.addEventListener("click", () => {
-                selected.textContent = li.textContent;
-                list.style.display = "none";
-            });
-            list.appendChild(li);
-        }
-
-        // Open / Close dropdown
-        selected.addEventListener("click", () => {
-            list.style.display = list.style.display === "block" ? "none" : "block";
-        });
-
-        // Close dropdown when clicking outside
-        document.addEventListener("click", (e) => {
-            if (!dropdown.contains(e.target)) {
-                list.style.display = "none";
-            }
-        });
-    });
-
-
-document.addEventListener('DOMContentLoaded', () => {
-    const bookingForm = document.getElementById('booking-form');
-
-    bookingForm.addEventListener('submit', (e) => {
-        e.preventDefault(); // always prevent default first
-
-        const name = document.getElementById('name').value.trim();
-        const surname = document.getElementById('surname').value.trim();
-        const phone = document.getElementById('phone').value.trim();
-        const email = document.getElementById('email').value.trim();
-        const date = document.getElementById('date').value.trim();
-        const time = document.getElementById('time').value.trim();
-        const guestsSelected = document.querySelector('.custom-dropdown .selected').textContent.trim();
-
-        if (!name || !surname || !phone || !email || !date || !time || guestsSelected === "Choose number of guests") {
-            alert("Please fill in all required fields before booking.");
-            return false; // stop submission
-        }
-
-        const phoneRegex = /^[0-9]{10,11}$/;
-        if (!phoneRegex.test(phone)) {
-            alert("Please enter a valid phone number.");
-            return false;
-        }
-
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
-            alert("Please enter a valid email address.");
-            return false;
-        }
-
-        // All validation passed — now redirect
-        window.location.href = "PaymentPage.html";
-    });
-});
-
-</script>
-
-
-
-
-
-
+<script src="BookATable.js"></script>
 
 </body>
 </html>

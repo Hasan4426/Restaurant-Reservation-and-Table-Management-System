@@ -1,3 +1,5 @@
+// DataManager.js
+
 // Import all object classes
 const Customer = require('./Customer');
 const Manager = require('./Manager');
@@ -5,172 +7,144 @@ const Table = require('./Table');
 const Reservation = require('./Reservation');
 const Payment = require('./Payment');
 
-
-//Storage Arrays
+// Storage Arrays
 const customers = [];
 const managers = [];
 const tables = [];
 const reservations = [];
 const payments = [];
 
-
-//INITIALIZATION
+// INITIALIZATION
 function initializeData() {
-    tables.push(new Table('T-1', 4, 'INDOOR'));
-    tables.push(new Table('T-2', 2, 'OUTDOOR'));
-    tables.push(new Table('T-3', 6, 'INDOOR'));
-    tables.push(new Table('T-4', 4, 'ANY'));
-    tables.push(new Table('T-5', 8, 'OUTDOOR'));
+    // Standard table setup
+    for (let i = 1; i <= 20; i++) {
+        let capacity = (i % 5 === 0) ? 8 : (i % 3 === 0) ? 6 : (i % 2 === 0) ? 2 : 4;
+        tables.push(new Table(`T-${i}`, capacity));
+    }
 
-    managers.push(new Manager('Manager@Eden.org', '12345678'));
-
+    managers.push(new Manager('Boss (Wo)Man', '12345678', 'Manager@Eden.org'));
     console.log(`DataManager initialized with ${tables.length} tables and ${managers.length} manager account.`);
 }
-
-
 
 function saveCustomer(customer) {
     customers.push(customer);
 }
 
-//Customer Login
 function findCustomerByEmail(email) {
     return customers.find(C => C.email === email);
 }
 
-//Manager Management
 function findManagerByEmail(email) {
-    // Finds and returns the manager that matches the username
     return managers.find(m => m.email === email);
 }
-
-//Reservation Management
 
 function saveReservation(reservation) {
     reservations.push(reservation);
 }
 
-function getAvailableTables(numGuests, date, time, preference) {
-    // 1. Identify tables already assigned to a reservation at this time
-    const bookedTableIds = reservations
-        // Filters for matching time/date (using includes since dateTime is a combined string)
-        .filter(res => res.dateTime.includes(date) && res.dateTime.includes(time))
-        // Map to the ID of the assigned table (safely handle unassigned tables)
-        .map(res => res.tableAssigned ? res.tableAssigned.TableID : null)
-        .filter(id => id !== null); // Remove any null IDs
+// RESERVATION MANAGEMENT
 
-    // 2. Filter for suitable tables
-    return tables.filter(table =>
-        //Large enough capacity
-        table.Capacity >= numGuests &&
-        //Not currently booked
-        !bookedTableIds.includes(table.TableID) &&
-        //Matches preference (if a specific preference is given)
-        (preference === 'ANY' || table.location === preference)
+/**
+ * Creates a new reservation and marks the table as RESERVED
+ *
+ */
+function makeReservation(customer, partySize, date, time, comment) {
+    // 1. Find a table with enough capacity that is AVAILABLE
+    const availableTable = tables.find(t =>
+        t.Capacity >= partySize && t.Tablestatus === 'AVAILABLE'
     );
-}
 
-//makeReservation (implements the core logic)
-function makeReservation(customer, partySize, date, time, preference, comment) {
-
-    //Check Availability
-    const availableTables = getAvailableTables(partySize, date, time, preference);
-
-    if (availableTables.length === 0) {
-        return { success: false, message: "No table available for this time/size." };
+    if (!availableTable) {
+        return { success: false, message: "No tables available for this time/size." };
     }
 
-    //Select the best table
-    //For simplicity, we just take the first available table.
-    const tableToAssign = availableTables.sort((a, b) => a.Capacity - b.Capacity)[0];
+    // 2. Create the Reservation (Status starts as PENDING)
+    const newRes = new Reservation(
+        customer.id,
+        availableTable.TableID,
+        partySize,
+        date,
+        time,
+        comment
+    );
 
-    //Create the Reservation object
-    const newReservation = new Reservation({
-        guests: partySize,
-        date: date,
-        time: time,
-        preference: preference,
-        diet: comment
-    }, customer.id);
+    // 3. Save and Update Status
+    reservations.push(newRes);
+    availableTable.Tablestatus = 'RESERVED';
 
-    //Assign the table and save
-    newReservation.tableAssigned = tableToAssign;
-    saveReservation(newReservation);
-    tableToAssign.AssignTable(); // Update the Table status to "BOOKED"
-
-    return { success: true, reservation: newReservation };
+    return { success: true, reservation: newRes };
 }
 
-//editReservation
+/**
+ * Handles editing an existing reservation.
+ * FIXED: Temporarily frees current table to prevent "No table available" error.
+ */
 function editReservation(reservationId, newDetails) {
+    const reservation = reservations.find(r => r.reservationId === reservationId);
+    if (!reservation) return { success: false, message: "Reservation not found." };
+
+    // 1. Find the current table assigned to this reservation
+    const currentTable = tables.find(t => t.TableID === reservation.tableId);
+
+    // 2. Temporarily mark it AVAILABLE so the search logic can see it as an option
+    if (currentTable) currentTable.Tablestatus = 'AVAILABLE';
+
+    // 3. Try to find a table for the NEW requirements
+    const partySize = parseInt(newDetails.guests || reservation.partySize);
+    const availableTable = tables.find(t =>
+        t.Capacity >= partySize && t.Tablestatus === 'AVAILABLE'
+    );
+
+    if (!availableTable) {
+        // If no table found, re-lock the old table and fail
+        if (currentTable) currentTable.Tablestatus = 'RESERVED';
+        return { success: false, message: "No tables available for these new requirements." };
+    }
+
+    // 4. Success: Update reservation and lock the (potentially new) table
+    reservation.date = newDetails.date || reservation.date;
+    reservation.time = newDetails.time || reservation.time;
+    reservation.partySize = partySize;
+    reservation.comment = newDetails.comment || reservation.comment;
+    reservation.tableId = availableTable.TableID;
+
+    availableTable.Tablestatus = 'RESERVED';
+    return { success: true };
+}
+
+/**
+ * Cancels reservation and releases the table
+ */
+function cancelReservationSystem(reservationId) {
     const reservation = reservations.find(r => r.reservationId === reservationId);
     if (!reservation) return false;
 
-    // Simplified update logic
-    if (newDetails.partySize) reservation.partySize = newDetails.partySize;
-    if (newDetails.comment) reservation.comment = newDetails.comment;
-
-    return true;
-}
-
-//cancel Reservation
-function cancelReservationSystem(reservationId) {
-    const index = reservations.findIndex(r => r.reservationId === reservationId);
-    if (index === -1) return false;
-
-    const reservation = reservations[index];
-
-    //Release the assigned table
-    if (reservation.tableAssigned) {
-        const table = tables.find(t => t.TableID === reservation.tableAssigned.TableID);
-        table.ReleaseTable();
+    // Release the assigned table back to AVAILABLE
+    const table = tables.find(t => t.TableID === reservation.tableId);
+    if (table) {
+        table.Tablestatus = 'AVAILABLE';
     }
 
-    reservation.cancelReservation(); //Update the reservation status to "CANCELLED"
-
+    reservation.status = 'CANCELLED';
     return true;
 }
 
-//displayDetails
-function displayReservationDetails(reservationId) {
-    const reservation = reservations.find(r => r.reservationId === reservationId);
-    if (!reservation) return null;
-
-    //Returns the full object for display
-    return reservation;
-}
-
-//countRecords
-function countReservationsByDate(date) {
-    return reservations.filter(res => res.dateTime.includes(date)).length;
-}
-
-//Payment Management
+// PAYMENT MANAGEMENT
 function savePayment(payment) {
     payments.push(payment);
 }
 
-
-//Export all public methods to be used by server.js
+// EXPORTS
 module.exports = {
     initializeData,
-
-    //Management methods
     saveCustomer,
     findCustomerByEmail,
     findManagerByEmail,
-
-    //Reservation Management
     saveReservation,
-    getAvailableTables,
     makeReservation,
     editReservation,
     cancelReservationSystem,
-    displayReservationDetails,
-    countReservationsByDate,
     savePayment,
-
-    //Getters
     getAllCustomers: () => customers,
     getAllManagers: () => managers,
     getAllTables: () => tables,

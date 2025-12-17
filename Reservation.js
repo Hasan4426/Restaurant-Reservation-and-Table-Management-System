@@ -3,18 +3,22 @@ const STATUS_CONFIRMED = 'CONFIRMED';
 const STATUS_CANCELLED = 'CANCELLED';
 
 class Reservation {
-    constructor(formData, customerId) {
-        this.reservationId = 'R-' + Date.now();
-        this.partySize = parseInt(formData.guests);
-        this.dateTime = `${formData.date} ${formData.time}`;
-        this.seatingPreference = formData.preference || 'ANY';
-
-        this.status = STATUS_PENDING;
-        this.feedBack = null;
-
-        this.customerId = customerId;
-        this.tableAssigned = null;
+    constructor(customerId, tableId, partySize, date, time, comment) {
+        this.reservationId = Date.now(); // Generate a unique ID
+        this.customerId = customerId;    // <--- Ensure this line exists!
+        this.tableId = tableId;
+        this.partySize = partySize;
+        this.date = date;
+        this.time = time;
+        this.comment = comment;
+        this.status = 'PENDING';
     }
+    finalizeReservation(success) {
+            if (success) {
+                this.status = 'CONFIRMED';
+            } else {
+                this.status = 'CANCELLED';
+            }
+        }
 }
-
 module.exports = Reservation;

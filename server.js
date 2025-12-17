@@ -2,273 +2,201 @@
 
 const express = require('express');
 const path = require('path');
+const session = require('express-session');
 const app = express();
 const port = 3000;
 
-// NEW: Import the session library
-const session = require('express-session');
-
-// ... (existing DataManager and Customer imports) ...
-// ... (existing DataManager.initializeData call) ...
-
-// NEW: Session Configuration
-// This MUST come before the routes (app.post, app.get)
-app.use(session({
-    secret: 'a-very-secret-key-that-should-be-long-and-random', // Required: Used to sign the session ID cookie
-    resave: false, // Prevents unnecessary saving of the session back to the session store
-    saveUninitialized: false, // Prevents saving a session that has nothing stored in it
-    cookie: { maxAge: 3600000 } // Session lasts for 1 hour (3,600,000 milliseconds)
-}));
-
 // Import the modules we created
 const DataManager = require('./DataManager');
-const Customer = require('./Customer'); // Import the Customer class
+const Customer = require('./Customer');
 const Payment = require('./Payment');
 
-// Middleware to read data from forms
+// =======================================================
+// MIDDLEWARE & CONFIGURATION
+// =======================================================
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve all your HTML/CSS/JS files from the '.idea' directory
-app.use(express.static(path.join(__dirname, '.idea')));
+app.use(session({
+    secret: 'a-very-secret-key-that-should-be-long-and-random',
+    resave: false,
+    saveUninitialized: false,
+    cookie: { maxAge: 3600000 } // 1 hour
+}));
 
+// Serve static files from the .idea directory
+app.use(express.static(path.join(__dirname, '.idea')));
 
 // Initialize the DataManager (load tables, create manager account, etc.)
 DataManager.initializeData();
 
-
-// =======================================================
-// CUSTOMER SIGN UP ROUTE
-// Handles POST requests from the signup.html form
-// =======================================================
-// server.js - Make sure this block is in your file!
-
-// ... (existing imports, middleware, and static file setup) ...
-
-// =======================================================
-// CUSTOMER SIGN UP ROUTE
-// =======================================================
-app.post('/signup', (req, res) => {
-    // 1. Extract data from the request body
-    const { email, username, password, confirmPassword } = req.body;
-
-    // 2. Server-side validation
-    if (!email || !username || !password || password !== confirmPassword) {
-        return res.status(400).json({
-            message: "Registration failed: Missing data or passwords do not match."
-        });
-    }
-
-    // 3. Check if a customer with this email already exists
-    const existingCustomer = DataManager.findCustomerByEmail(email);
-    if (existingCustomer) {
-        console.log(`Signup failed: Email ${email} already used.`);
-        return res.status(409).json({
-            message: "This email is already in use. Please choose another."
-        });
-    }
-
-    // 4. Create and save the new Customer
-    const newCustomer = Customer.register(username, password, email, 'N/A');
-    DataManager.saveCustomer(newCustomer);
-
-    console.log(`SUCCESS: New Customer Registered: ${newCustomer.usernameCus}`);
-
-    // 5. Send success response (frontend will handle redirect)
-    return res.status(201).json({
-        message: "Signup successful"
-    });
-});
-////hi
-
-// server.js - Add this new route
-
-// =======================================================
-// CUSTOMER LOGIN ROUTE
-// Handles POST requests from the login.html form
-// =======================================================
-app.post('/login', (req, res) => {
-    // 1. Extract data from the form (using the 'name' attributes: email, password)
-    const { email, password } = req.body; // <<< We now look for 'email'
-
-    if (!email || !password) {
-        return res.send("Login failed: Missing email or password.");
-    }
-
-    // 2. Find the customer object using the EMAIL
-    const customer = DataManager.findCustomerByEmail(email); // <<< Using the new function
-
-    if (!customer) {
-        console.log(`Login failed: User with email ${email} not found.`);
-        return res.send("Login failed: Invalid email or password.");
-    }
-
-    // 3. Verify the password using the Customer class login method
-    if (customer.login(password,email)) {
-
-       // NEW: Session Creation!
-           // We store the customer's ID and Username in the session object.
-           req.session.isLoggedIn = true;
-           req.session.userId = customer.id;
-           req.session.username = customer.usernameCus;
-
-        console.log(`SUCCESS: Customer ${customer.usernameCus} logged in!`);
-
-        // 4. Redirect to the Customer Dashboard on success
-        return res.redirect('/CustomerDashboard.html');
-    } else {
-        console.log(`Login failed: Incorrect password for user ${customer.usernameCus}.`);
-        return res.send("Login failed: Invalid email or password.");
-    }
-});
-
-// ... (rest of server.js, including the temporary /book-reservation route and app.listen) ...
-
-
-// server.js - REPLACE the existing app.post('/book-reservation', ...) block
-
-// =======================================================
-// RESERVATION BOOKING ROUTE
-// Handles POST requests from the booking form
-// =======================================================
-app.post('/book-reservation', requireLogin, (req, res) => { // <<< ADDED requireLogin
-
-    // 1. Authorization and Customer Identification (using the session)
-    const customerId = req.session.userId;
-    if (!customerId) {
-        // This is a safety check; requireLogin should prevent this
-        return res.redirect('/login.html');
-    }
-
-    // 2. Extract Data from the Booking Form
-    const {
-        name, surname, phone, email, guests, date, time, event, diet
-    } = req.body;
-
-    // We will use the 'guests' field as partySize, 'event' as preference, and 'diet' as comment.
-    const partySize = parseInt(guests);
-    const preference = event || 'ANY';
-    const comment = diet || '';
-
-    if (isNaN(partySize) || partySize < 1 || !date || !time) {
-        return res.send("Booking failed: Missing or invalid date/time or number of guests.");
-    }
-
-    // 3. Call the Core Business Logic
-    // We use the central DataManager function which handles availability, table assignment, and creation.
-    const result = DataManager.makeReservation(
-        { id: customerId }, // Pass a simple object with the necessary ID
-        partySize,
-        date,
-        time,
-        preference,
-        comment
-    );
-
-    // 4. Handle Result and Respond
-    if (result.success) {
-        console.log(`BOOKING SUCCESS for Customer ${customerId}. Reservation ID: ${result.reservation.reservationId}.`);
-
-        // Redirect to the payment page to finalize (as planned)
-        return res.redirect('/PaymentPage.html');
-
-    } else {
-        console.log(`BOOKING FAILED: ${result.message}`);
-        // Display a user-friendly error
-        return res.send(`Booking failed: ${result.message} Please choose another time.`);
-    }
-});
-
-// server.js - Add this new route before the app.listen block
-
-// =======================================================
-// PAYMENT PROCESSING ROUTE
-// =======================================================
-app.post('/process-payment', requireLogin, (req, res) => {
-    // 1. Get current reservation (for this example, we'll assume the last one created by the user)
-    // NOTE: In a real app, the reservation ID would be passed from the booking page.
-    const lastReservation = DataManager.getAllReservations().find(
-        r => r.customerId === req.session.userId && r.status === 'PENDING'
-    );
-
-    if (!lastReservation) {
-        return res.send("Error: No pending reservation found to pay for.");
-    }
-
-    const depositAmount = parseFloat(req.body.depositAmount);
-
-    // 2. Create the Payment object
-    const newPayment = new Payment(
-        lastReservation.reservationId, // The reservation being paid for
-        depositAmount, // The amount from the form
-        req.session.userId // The customer ID
-    );
-
-    // 3. Save Payment and Finalize Reservation Status
-    DataManager.savePayment(newPayment);
-
-    // Call the method on the Reservation object to update its internal status
-    lastReservation.finalizeReservation(true); // Finalize with success=true
-
-    console.log(`PAYMENT SUCCESS. Reservation ${lastReservation.reservationId} is CONFIRMED.`);
-
-    // 4. Redirect to a success page
-    res.redirect('/CustomerDashboard.html');
-});
-
-// server.js - Add this new function anywhere outside your routes
-
-// NEW: Middleware to check if the user is logged in
+// Middleware to check if the user is logged in
 function requireLogin(req, res, next) {
     if (req.session.isLoggedIn) {
-        // User is logged in, continue to the next middleware or route handler
         next();
     } else {
-        // User is not logged in, redirect them to the login page
         res.redirect('/login.html');
     }
 }
 
-
-// server.js - Add this NEW secured route block (Place right before app.listen)
-
 // =======================================================
-// SECURED ROUTES
+// AUTHENTICATION ROUTES
 // =======================================================
 
-// Protects the booking page. Only logged-in users can see this page.
-app.get('/BookATable.html', requireLogin, (req, res) => {
-    // If we reach here, the user is logged in.
-    res.sendFile(path.join(__dirname, '.idea', 'BookATable.html'));
+app.post('/signup', (req, res) => {
+    const { email, username, password, confirmPassword } = req.body;
+
+    if (!email || !username || !password || password !== confirmPassword) {
+        return res.status(400).json({ message: "Registration failed: Missing data or passwords do not match." });
+    }
+
+    const existingCustomer = DataManager.findCustomerByEmail(email);
+    if (existingCustomer) {
+        return res.status(409).json({ message: "This email is already in use." });
+    }
+
+    const newCustomer = Customer.register(username, password, email, 'N/A');
+    DataManager.saveCustomer(newCustomer);
+
+    console.log(`SUCCESS: New Customer Registered: ${newCustomer.usernameCus}`);
+    return res.status(201).json({ message: "Signup successful" });
 });
 
-// Protects the dashboard. Only logged-in users can see this page.
-app.get('/CustomerDashboard.html', requireLogin, (req, res) => {
-    // If we reach here, the user is logged in.
-    // Send the actual HTML file from the .idea directory.
-    res.sendFile(path.join(__dirname, '.idea', 'CustomerDashboard.html'));
+app.post('/login', (req, res) => {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+        return res.status(400).send("Login failed: Missing email or password.");
+    }
+
+    let user = DataManager.findCustomerByEmail(email);
+    let role = 'customer';
+
+    if (!user) {
+        user = DataManager.findManagerByEmail(email);
+        role = 'manager';
+    }
+
+    if (user && user.login(password, email)) {
+        req.session.isLoggedIn = true;
+        req.session.role = role;
+        req.session.username = user.usernameCus || user.username;
+        req.session.userId = user.id || user.employeeID;
+
+        console.log(`SUCCESS: ${role.toUpperCase()} ${req.session.username} logged in!`);
+
+        const redirectPath = role === 'manager' ? '/manager-dashboard.html' : '/CustomerDashboard.html';
+        return res.status(200).send(redirectPath);
+    } else {
+        return res.status(401).send("Login failed: Invalid email or password.");
+    }
 });
 
-
-// Add a Logout Route for cleanup
 app.get('/logout', (req, res) => {
     req.session.destroy(err => {
-        if (err) {
-            console.error('Logout error:', err);
-            return res.send("Error logging out.");
-        }
-        console.log(`User logged out. Session destroyed.`);
-        res.redirect('/WelcomePage.html'); // Send them back to the welcome page
+        if (err) return res.send("Error logging out.");
+        res.redirect('/WelcomePage.html');
     });
 });
 
+// =======================================================
+// RESERVATION & API ROUTES
+// =======================================================
 
+app.post('/book-reservation', requireLogin, (req, res) => {
+    const customerId = req.session.userId;
+    const { guests, date, time, diet } = req.body;
+    const partySize = parseInt(guests);
+
+    if (isNaN(partySize) || !date || !time) {
+        return res.status(400).send("Booking failed: Invalid data.");
+    }
+
+    const result = DataManager.makeReservation({ id: customerId }, partySize, date, time, diet || '');
+
+    if (result.success) {
+        console.log(`SUCCESS: Reservation ${result.reservation.reservationId} created.`);
+        return res.status(200).send("Success");
+    } else {
+        return res.status(400).send(result.message);
+    }
+});
+
+app.get('/api/my-reservations', requireLogin, (req, res) => {
+    const userBookings = DataManager.getAllReservations().filter(
+        r => r.customerId === req.session.userId
+    );
+    res.json(userBookings);
+});
+
+// FIXED: Robust Payment Processing
+app.post('/process-payment', requireLogin, (req, res) => {
+    const customerId = req.session.userId;
+
+    // Find latest PENDING reservation
+    const reservation = DataManager.getAllReservations()
+        .filter(r => r.customerId === customerId && r.status === 'PENDING')
+        .pop();
+
+    if (reservation) {
+        reservation.status = 'CONFIRMED'; // Actual logic update
+        const depositAmount = parseFloat(req.body.depositAmount) || 500;
+        DataManager.savePayment(new Payment(reservation.reservationId, depositAmount, customerId));
+
+        console.log(`PAYMENT SUCCESS: Reservation ${reservation.reservationId} is CONFIRMED.`);
+        res.redirect('/CustomerDashboard.html');
+    } else {
+        res.status(404).send("No pending reservation found.");
+    }
+});
+
+// FIXED: Update Reservation Route (uses DataManager's new logic)
+app.post('/api/update-reservation', requireLogin, (req, res) => {
+    const { reservationId, date, time, guests, comment } = req.body;
+
+    // Calls the DataManager fix that prevents "No Table Available" on self-edits
+    const result = DataManager.editReservation(parseInt(reservationId), {
+        date, time, guests, comment
+    });
+
+    if (result.success) {
+        res.status(200).send("Update successful");
+    } else {
+        res.status(400).send(result.message);
+    }
+});
+
+app.post('/api/cancel-reservation/:id', requireLogin, (req, res) => {
+    const resId = parseInt(req.params.id);
+    const success = DataManager.cancelReservationSystem(resId);
+
+    if (success) {
+        return res.status(200).send("Cancelled");
+    }
+    res.status(403).send("Unauthorized or not found");
+});
+
+// =======================================================
+// PAGE ROUTING
+// =======================================================
+
+app.get('/BookATable.html', requireLogin, (req, res) => {
+    res.sendFile(path.join(__dirname, '.idea', 'BookATable.html'));
+});
+
+app.get('/CustomerDashboard.html', requireLogin, (req, res) => {
+    res.sendFile(path.join(__dirname, '.idea', 'CustomerDashboard.html'));
+});
+
+app.get('/reservation-management.html', requireLogin, (req, res) => {
+    res.sendFile(path.join(__dirname, '.idea', 'reservation-management.html'));
+});
 
 // =======================================================
 // START SERVER
 // =======================================================
 app.listen(port, () => {
     console.log('--------------------------------------------------');
-    console.log(`Server is running! Open your browser to: http://localhost:${port}/WelcomePage.html`);
+    console.log(`Server is running! http://localhost:${port}/WelcomePage.html`);
     console.log('--------------------------------------------------');
 });

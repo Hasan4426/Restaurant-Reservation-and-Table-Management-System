@@ -1,106 +1,106 @@
-// Reservation Management JavaScript - Streamlined for List View Only
+// Reservation Management JavaScript - Linked to Backend API
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize the page
     initializePage();
-
-    // Setup event listeners
     setupEventListeners();
-
-    // Load reservations (Initial load)
     loadReservations();
-
-    console.log('Reservation management page initialized for List View');
 });
 
-// --- Mock Data ---
-let reservations = [
-    { id: 1, date: '2025-12-24', time: '19:30', guests: 4, occasion: 'Birthday', specialRequests: 'Need a quiet corner table.', status: 'upcoming' },
-    { id: 2, date: '2025-11-05', time: '18:00', guests: 2, occasion: 'None', specialRequests: '', status: 'completed' },
-    { id: 3, date: '2025-12-15', time: '20:00', guests: 6, occasion: 'Anniversary', specialRequests: 'A single red rose on the table.', status: 'upcoming' },
-    { id: 4, date: '2025-12-01', time: '17:30', guests: 3, occasion: 'Friends Get-together', specialRequests: '', status: 'cancelled' },
-];
-
+let reservations = [];
 let currentEditId = null;
 
-// --- Initialization ---
 function initializePage() {
-    // Set minimum date for date inputs
     const today = new Date().toISOString().split('T')[0];
-    document.getElementById('editDate').setAttribute('min', today);
+    const dateInput = document.getElementById('editDate');
+    if (dateInput) dateInput.setAttribute('min', today);
 }
 
-// --- Event Listeners ---
 function setupEventListeners() {
-    // Search control
-    document.getElementById('searchReservations').addEventListener('input', debounce(searchReservations, 300));
+    const searchInput = document.getElementById('searchReservations');
+    if (searchInput) {
+        searchInput.addEventListener('input', debounce(searchReservations, 300));
+    }
 
-    // Edit modal save
-    document.getElementById('saveReservation').addEventListener('click', saveReservation);
+    const saveBtn = document.getElementById('saveReservation');
+    if (saveBtn) saveBtn.addEventListener('click', saveReservation);
 
-    // Cancel modal confirmation
-    document.getElementById('confirmCancellation').addEventListener('click', confirmCancellation);
+    const cancelBtn = document.getElementById('confirmCancellation');
+    if (cancelBtn) cancelBtn.addEventListener('click', confirmCancellation);
 }
 
-// --- Reservation Loading and Display ---
-
-function loadReservations(searchQuery = '') {
+async function loadReservations(searchQuery = '') {
     const listElement = document.getElementById('reservationList');
     const emptyState = document.getElementById('emptyState');
-    listElement.innerHTML = '';
+    if (!listElement) return;
 
-    const filteredReservations = reservations.filter(res => {
-        const query = searchQuery.toLowerCase();
-        const dateStr = formatDate(res.date);
-        const timeStr = formatTime(res.time);
+    listElement.innerHTML = '<p style="color: #b5935b;">Fetching your reservations...</p>';
 
-        return (
-            res.status !== 'cancelled' && // Only show non-cancelled in default list
-            (dateStr.toLowerCase().includes(query) ||
-             timeStr.toLowerCase().includes(query) ||
-             res.occasion.toLowerCase().includes(query) ||
-             res.status.toLowerCase().includes(query))
-        );
-    }).sort((a, b) => new Date(a.date) - new Date(b.date)); // Sort by date
+    try {
+        const response = await fetch('/api/my-reservations');
 
-    if (filteredReservations.length === 0) {
-        emptyState.style.display = 'block';
-        return;
+        // NEW: Redirect to login if session is expired (Unauthorized)
+        if (response.status === 401) {
+            window.location.href = "login.html";
+            return;
+        }
+
+        if (!response.ok) throw new Error("Failed to fetch");
+
+        reservations = await response.json();
+        listElement.innerHTML = '';
+
+        const filteredReservations = reservations.filter(res => {
+            const query = searchQuery.toLowerCase();
+            const dateStr = formatDate(res.date);
+            return (
+                dateStr.toLowerCase().includes(query) ||
+                res.status.toLowerCase().includes(query)
+            );
+        }).sort((a, b) => new Date(a.date) - new Date(b.date));
+
+        if (filteredReservations.length === 0) {
+            emptyState.style.display = 'block';
+            return;
+        }
+        emptyState.style.display = 'none';
+
+        filteredReservations.forEach(res => {
+            listElement.appendChild(createReservationCard(res));
+        });
+    } catch (error) {
+        console.error("Error loading reservations:", error);
+        listElement.innerHTML = '<p>Error loading your reservations. Please try again later.</p>';
     }
-    emptyState.style.display = 'none';
-
-    filteredReservations.forEach(res => {
-        listElement.appendChild(createReservationCard(res));
-    });
 }
 
 function createReservationCard(res) {
     const card = document.createElement('div');
     card.className = 'reservation-card';
-    card.setAttribute('data-id', res.id);
+    card.style.border = "1px solid #b5935b";
+    card.style.margin = "10px 0";
+    card.style.padding = "15px";
 
-    const statusClass = `status-${res.status}`;
+    const statusClass = `status-${res.status.toLowerCase()}`;
     const dateStr = formatDate(res.date);
     const timeStr = formatTime(res.time);
 
     card.innerHTML = `
         <div class="reservation-info">
-            <h6>${dateStr} at ${timeStr}</h6>
-            <p>Guests: ${res.guests}</p>
-            <p>Occasion: ${formatOccasion(res.occasion)}</p>
-            <p class="special-requests">${res.specialRequests || 'No special requests.'}</p>
+            <h6 style="color: #b5935b; font-weight: bold;">${dateStr} at ${timeStr}</h6>
+            <p>Guests: ${res.partySize}</p>
+            <p class="special-requests">${res.comment || 'No special requests.'}</p>
         </div>
-        <span class="reservation-status ${statusClass}">${res.status}</span>
+        <span class="reservation-status ${statusClass}" style="text-transform: uppercase; font-size: 0.8rem;">${res.status}</span>
         <div class="reservation-actions">
-            ${res.status === 'upcoming' ? `
-                <button class="btn action-btn edit-btn" onclick="openEditModal(${res.id})">
+            ${res.status === 'PENDING' || res.status === 'CONFIRMED' ? `
+                <button class="btn action-btn edit-btn" onclick="openEditModal(${res.reservationId})">
                     <i class="fas fa-edit"></i> Edit
                 </button>
-                <button class="btn action-btn cancel-btn" onclick="openCancelModal(${res.id})">
+                <button class="btn action-btn cancel-btn" onclick="openCancelModal(${res.reservationId})">
                     <i class="fas fa-times-circle"></i> Cancel
                 </button>
             ` : `
                 <button class="btn action-btn view-btn" disabled>
-                    <i class="fas fa-check"></i> ${res.status === 'completed' ? 'Completed' : 'Cancelled'}
+                    <i class="fas fa-check"></i> ${res.status}
                 </button>
             `}
         </div>
@@ -108,98 +108,82 @@ function createReservationCard(res) {
     return card;
 }
 
-// --- Search Functionality ---
-
-function searchReservations(event) {
-    const query = event.target.value;
-    loadReservations(query);
-}
-
-// --- Modal Handlers (Edit/Save) ---
-
 function openEditModal(id) {
     currentEditId = id;
-    const res = reservations.find(r => r.id === id);
+    const res = reservations.find(r => r.reservationId === id);
+    if (!res) return;
 
-    document.getElementById('editReservationId').value = res.id;
     document.getElementById('editDate').value = res.date;
     document.getElementById('editTime').value = res.time;
-    document.getElementById('editGuests').value = res.guests;
-    document.getElementById('editOccasion').value = res.occasion === 'None' ? '' : res.occasion;
-    document.getElementById('editSpecialRequests').value = res.specialRequests;
+    document.getElementById('editGuests').value = res.partySize;
+    document.getElementById('editSpecialRequests').value = res.comment || '';
 
     const editModal = new bootstrap.Modal(document.getElementById('editModal'));
     editModal.show();
 }
 
-function saveReservation() {
-    clearAllErrors();
+async function saveReservation() {
     const id = currentEditId;
+    const updatedData = {
+        reservationId: id,
+        date: document.getElementById('editDate').value,
+        time: document.getElementById('editTime').value,
+        guests: parseInt(document.getElementById('editGuests').value),
+        comment: document.getElementById('editSpecialRequests').value
+    };
 
-    let isValid = true;
+    try {
+        const response = await fetch('/api/update-reservation', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updatedData)
+        });
 
-    const date = document.getElementById('editDate').value;
-    const time = document.getElementById('editTime').value;
-    const guests = parseInt(document.getElementById('editGuests').value);
-    const occasion = document.getElementById('editOccasion').value.trim() || 'None';
-    const specialRequests = document.getElementById('editSpecialRequests').value.trim();
-
-    // Validation
-    if (!date) { showFieldError('editDate', 'Date is required.'); isValid = false; }
-    if (!time) { showFieldError('editTime', 'Time is required.'); isValid = false; }
-    if (isNaN(guests) || guests < 1 || guests > 10) { showFieldError('editGuests', 'Guests must be between 1 and 10.'); isValid = false; }
-
-    if (isValid) {
-        const resIndex = reservations.findIndex(r => r.id === id);
-        if (resIndex !== -1) {
-            reservations[resIndex].date = date;
-            reservations[resIndex].time = time;
-            reservations[resIndex].guests = guests;
-            reservations[resIndex].occasion = occasion;
-            reservations[resIndex].specialRequests = specialRequests;
+        if (response.ok) {
+            const editModal = bootstrap.Modal.getInstance(document.getElementById('editModal'));
+            if (editModal) editModal.hide();
+            showSuccessModal('Reservation updated successfully!');
+            loadReservations();
+        } else {
+            const errorMsg = await response.text();
+            alert("Failed to update: " + errorMsg);
         }
-
-        // Close modal and refresh list
-        const editModal = bootstrap.Modal.getInstance(document.getElementById('editModal'));
-        editModal.hide();
-
-        loadReservations();
-        showSuccessModal('Reservation updated successfully!');
+    } catch (error) {
+        console.error("Update error:", error);
     }
 }
 
-// --- Modal Handlers (Cancel) ---
-
 function openCancelModal(id) {
     currentEditId = id;
-    const res = reservations.find(r => r.id === id);
+    const res = reservations.find(r => r.reservationId === id);
     if (!res) return;
 
-    const details = `${formatDate(res.date)} at ${formatTime(res.time)} for ${res.guests} guests`;
-    document.getElementById('cancelReservationDetails').textContent = details;
+    const details = `${formatDate(res.date)} at ${formatTime(res.time)} for ${res.partySize} guests`;
+    const detailsElement = document.getElementById('cancelReservationDetails');
+    if (detailsElement) detailsElement.textContent = details;
 
     const cancelModal = new bootstrap.Modal(document.getElementById('cancelModal'));
     cancelModal.show();
 }
 
-function confirmCancellation() {
+async function confirmCancellation() {
     const id = currentEditId;
-    const resIndex = reservations.findIndex(r => r.id === id);
-
-    if (resIndex !== -1) {
-        reservations[resIndex].status = 'cancelled';
+    try {
+        const response = await fetch(`/api/cancel-reservation/${id}`, { method: 'POST' });
+        if (response.ok) {
+            const cancelModal = bootstrap.Modal.getInstance(document.getElementById('cancelModal'));
+            if (cancelModal) cancelModal.hide();
+            showSuccessModal('Reservation cancelled successfully.');
+            loadReservations();
+        } else {
+            alert("Failed to cancel reservation.");
+        }
+    } catch (error) {
+        console.error("Cancellation error:", error);
     }
-
-    // Close modal and refresh list
-    const cancelModal = bootstrap.Modal.getInstance(document.getElementById('cancelModal'));
-    cancelModal.hide();
-
-    loadReservations();
-    showSuccessModal('Reservation cancelled successfully.');
 }
 
-// --- Utility Functions ---
-
+// --- Utilities ---
 function formatDate(dateString) {
     const options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
     return new Date(dateString).toLocaleDateString(undefined, options);
@@ -211,36 +195,23 @@ function formatTime(timeString) {
     return date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', hour12: true });
 }
 
-function formatOccasion(occasion) {
-    if (!occasion || occasion === 'None') return 'General Dining';
-    return occasion.charAt(0).toUpperCase() + occasion.slice(1);
-}
-
-// Error handling functions
-function showFieldError(fieldId, message) {
-    const errorElement = document.getElementById(fieldId + 'Error');
-    errorElement.textContent = message;
-    errorElement.classList.add('show');
-}
-
-function clearAllErrors() {
-    document.querySelectorAll('.error-message').forEach(error => {
-        error.classList.remove('show');
-    });
+function searchReservations(event) {
+    loadReservations(event.target.value);
 }
 
 function showSuccessModal(message) {
-    document.getElementById('successMessage').textContent = message;
-    // Ensure Bootstrap is loaded before attempting to use its features
-    if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-        const modal = new bootstrap.Modal(document.getElementById('successModal'));
+    const msgElem = document.getElementById('successMessage');
+    if (msgElem) msgElem.textContent = message;
+    const successModalElem = document.getElementById('successModal');
+    if (successModalElem && typeof bootstrap !== 'undefined') {
+        const modal = new bootstrap.Modal(successModalElem);
         modal.show();
     } else {
-        alert("Success: " + message); // Fallback
+        alert(message);
     }
 }
 
-// Debounce function
+// FIXED: Completed the debounce function
 function debounce(func, wait) {
     let timeout;
     return function executedFunction(...args) {

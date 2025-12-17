@@ -83,7 +83,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             // ✅ Success → redirect
-            window.location.href = "CustomerDashboard.html";
+            window.location.href = "login.html";
 
         } catch (error) {
             serverError.textContent = "Server error. Please try again later.";

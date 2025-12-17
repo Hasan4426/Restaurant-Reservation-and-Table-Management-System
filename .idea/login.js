@@ -5,46 +5,55 @@ document.addEventListener("DOMContentLoaded", () => {
     const emailInput = document.getElementById("email");
 
     // Toggle password visibility
-    togglePassword.addEventListener("click", () => {
-        if (passwordInput.type === "password") {
-            passwordInput.type = "text";
-            togglePassword.textContent = "👁️";
-        } else {
-            passwordInput.type = "password";
-            togglePassword.textContent = "🙈";
-        }
-    });
+    if (togglePassword) {
+        togglePassword.addEventListener("click", () => {
+            if (passwordInput.type === "password") {
+                passwordInput.type = "text";
+                togglePassword.textContent = "👁️";
+            } else {
+                passwordInput.type = "password";
+                togglePassword.textContent = "🙈";
+            }
+        });
+    }
 
     // Form submission
     loginForm.addEventListener("submit", async (e) => {
         e.preventDefault();
 
-        // Basic frontend validation
-        if (!emailInput.value.trim() || passwordInput.value.trim().length < 6) {
-            alert("Please enter valid email and password (min 6 characters)");
-            return;
-        }
+        const email = emailInput.value.trim();
+        const password = passwordInput.value.trim();
 
-        // Send login request to backend
         try {
-            const response = await fetch("http://localhost:3000/login", {
+            const response = await fetch("/login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    email: emailInput.value.trim(),
-                    password: passwordInput.value.trim()
-                })
+                body: JSON.stringify({ email, password })
             });
 
-            const data = await response.json();
-            alert(data.message);
+            // LOGIC: Check if the server performed a direct redirect
+            if (response.redirected) {
+                window.location.href = response.url;
+                return;
+            }
+
+            // Get the response text (which is either an error message or a dashboard path)
+            const resultText = await response.text();
 
             if (response.ok) {
-                window.location.href = "CustomerDashboard.html"; // redirect on success
+                // SUCCESS LOGIC:
+                // resultText contains the path from the server (e.g., "/manager-dashboard.html")
+                // We use that to redirect the user to the correct role-based page.
+                window.location.href = resultText;
+            } else {
+                // ERROR LOGIC:
+                // Show the error message sent by the server (e.g., "Invalid email or password")
+                alert(resultText || "Login failed. Please check your credentials.");
             }
+
         } catch (error) {
-            alert("Error connecting to server. Try again.");
-            console.error(error);
+            alert("Error connecting to server. Please try again.");
+            console.error("Login Error:", error);
         }
     });
 });

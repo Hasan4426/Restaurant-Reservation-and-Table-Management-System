@@ -1,47 +1,21 @@
- // Generate numbers dynamically
-   document.addEventListener("DOMContentLoaded", () => {
-           const dropdown = document.querySelector(".custom-dropdown");
-           const selected = dropdown.querySelector(".selected");
-           const list = dropdown.querySelector(".dropdown-list");
-        for (let i = 1; i <= 20; i++) {
-            let li = document.createElement("li");
-            li.textContent = i;
-            li.addEventListener("click", () => {
-                selected.textContent = li.textContent;
-                list.style.display = "none";
-            });
-            list.appendChild(li);
-        }
-
-        // Open / Close dropdown
-        selected.addEventListener("click", () => {
-            list.style.display = list.style.display === "block" ? "none" : "block";
-        });
-
-        // Close dropdown when clicking outside
-        document.addEventListener("click", (e) => {
-            if (!dropdown.contains(e.target)) {
-                list.style.display = "none";
-            }
-        });
-    });
-    document.getElementById("book-now").addEventListener("click", () => {
-        window.location.href = "PaymentPage.html"; // redirect to Payment Page
-    });
 // BookATable.js
 
 document.addEventListener("DOMContentLoaded", () => {
-    // Custom dropdown
+    // --- 1. Custom Guest Dropdown Logic ---
     const dropdown = document.querySelector(".custom-dropdown");
     const selected = dropdown.querySelector(".selected");
     const list = dropdown.querySelector(".dropdown-list");
+    let selectedGuests = ""; // Variable to hold the selected party size
 
+    // Generate numbers 1 to 20 dynamically
     for (let i = 1; i <= 20; i++) {
         let li = document.createElement("li");
         li.textContent = i;
         li.addEventListener("click", () => {
             selected.textContent = li.textContent;
+            selectedGuests = li.textContent; // Update our variable
             list.style.display = "none";
+            selected.classList.remove("placeholder"); // Visual fix
         });
         list.appendChild(li);
     }
@@ -56,26 +30,49 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // Form validation and redirect
-    const form = document.getElementById("booking-form");
-    form.addEventListener("submit", (e) => {
-        e.preventDefault(); // prevent default submit
+    // --- 2. Form Submission logic ---
+    const bookingForm = document.getElementById('booking-form');
 
-        const requiredFields = ["name", "surname", "phone", "email", "guests", "date", "time"];
-        let valid = true;
+    bookingForm.addEventListener("submit", async (e) => {
+        e.preventDefault(); // Stop page refresh
 
-        requiredFields.forEach(id => {
-            const field = document.getElementById(id);
-            if (field.tagName === "INPUT" && !field.value.trim()) valid = false;
-            if (field.tagName === "SELECT" && field.value === "") valid = false;
-        });
-
-        if (!valid) {
-            alert("Please fill in all required fields!");
+        // Frontend validation
+        if (!selectedGuests || selectedGuests === "Choose number of guests") {
+            alert("Please choose the number of guests.");
             return;
         }
 
-        // If valid, redirect
-        window.location.href = "PaymentPage.html";
+        // Logical Link: Prepare data matching the backend's new requirements
+        const bookingData = {
+            name: document.getElementById("name").value.trim(),
+            surname: document.getElementById("surname").value.trim(),
+            phone: document.getElementById("phone").value.trim(),
+            email: document.getElementById("email").value.trim(),
+            guests: selectedGuests,
+            date: document.getElementById("date").value,
+            time: document.getElementById("time").value,
+            diet: document.getElementById("diet").value.trim() // 'preference' is removed
+        };
+
+        try {
+            // Send to backend route defined in server.js
+            const response = await fetch("/book-reservation", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(bookingData)
+            });
+
+            if (response.ok) {
+                // SUCCESS: Proceed to payment as requested
+                window.location.href = "PaymentPage.html";
+            } else {
+                // FAILURE: Show server's error message (e.g., "No tables available")
+                const errorMsg = await response.text();
+                alert("Booking Error: " + errorMsg);
+            }
+        } catch (error) {
+            console.error("Connection Error:", error);
+            alert("Failed to connect to the server.");
+        }
     });
 });

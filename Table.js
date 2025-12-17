@@ -4,10 +4,9 @@ const STATUS_CLEANING = 'CLEANING';
 const STATUS_OCCUPIED = 'OCCUPIED';
 
 class Table {
-    constructor(id, capacity, location) {
+    constructor(id, capacity) {
         this.TableID = id;
         this.Capacity = capacity;
-        this.location = location;
         this.Tablestatus = STATUS_AVAILABLE;
     }
 
@@ -24,7 +23,6 @@ class Table {
     }
 
     UpdateTableDetailsManually(location, newCapacity) {
-        this.location = location;
         this.Capacity = newCapacity;
     }
 }
