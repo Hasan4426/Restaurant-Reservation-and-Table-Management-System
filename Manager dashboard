@@ -834,11 +834,54 @@
           font-size: 16px;
         }
 
+        .reservation-status {
+          padding: 4px 8px;
+          border-radius: 12px;
+          font-size: 12px;
+          font-weight: bold;
+        }
+
+        .status-confirmed {
+          background-color: #4CAF50;
+          color: white;
+        }
+
+        .status-pending {
+          background-color: #FFC107;
+          color: #333;
+        }
+
+        .status-cancelled {
+          background-color: #f44336;
+          color: white;
+        }
         .reservation-details {
           display: grid;
           grid-template-columns: 1fr 1fr;
           gap: 10px;
           font-size: 14px;
+        }
+
+        .detail-item {
+          display: flex;
+          flex-direction: column;
+        }
+
+        .detail-label {
+          font-size: 12px;
+          color: #aaa;
+          margin-bottom: 2px;
+        }
+
+        .detail-value {
+          font-weight: bold;
+        }
+
+        .no-reservations {
+          text-align: center;
+          padding: 40px;
+          color: #aaa;
+          font-style: italic;
         }
 
         /* Edit Modal */
@@ -973,6 +1016,9 @@
         </button>
         <button data-section="reports" title="Reports">
             REPORTS
+        </button>
+        <button id="logoutBtn" data-section="logout" title="Logout">
+            LOGOUT
         </button>
     </div>
 </div>
@@ -2405,6 +2451,6 @@
     console.log(`Eden's Table Restaurant Stats:`);
     console.log(`Total customers: ${membersData.length}`);
 </script>
-
+<script src="manager-dashboard-api.js"></script>
 </body>
 </html>
