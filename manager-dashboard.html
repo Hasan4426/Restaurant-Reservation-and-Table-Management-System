@@ -34,7 +34,7 @@
         }
 
         .sidebar {
-          width: 120px;
+          width: 140px;
           background-color: var(--primary);
           color: #fff;
           display: flex;
@@ -64,7 +64,7 @@
         .sidebar-nav {
           display: flex;
           flex-direction: column;
-          gap: 20px;
+          gap: 15px;
           width: 100%;
         }
 
@@ -73,17 +73,17 @@
           border: none;
           color: #fff;
           padding: 12px 0;
-          font-size: 14px;
+          font-size: 13px;
           cursor: pointer;
           border-radius: 8px;
           transition: all 0.3s;
           width: 100%;
-          height: 50px;
+          height: 45px;
           display: flex;
           align-items: center;
           justify-content: center;
           font-weight: bold;
-          letter-spacing: 1px;
+          letter-spacing: 0.5px;
         }
 
         .sidebar-nav button:hover {
@@ -456,9 +456,20 @@
           background-color: #d32f2f;
         }
 
+        /* Sections */
+        .accounts-section,
+        .reservations-section,
+        .feedback-section,
         .reports-section {
           display: none;
           flex: 1;
+        }
+
+        .accounts-section.active,
+        .reservations-section.active,
+        .feedback-section.active,
+        .reports-section.active {
+          display: block;
         }
 
         .reports-grid {
@@ -550,6 +561,166 @@
           color: #aaa;
         }
 
+        /* Reservations List */
+        .reservations-list,
+        .feedback-list-container {
+          display: flex;
+          flex-direction: column;
+          gap: 15px;
+          margin-top: 20px;
+        }
+
+        .reservation-item-global,
+        .feedback-item-global {
+          background-color: var(--card-bg);
+          padding: 20px;
+          border-radius: 8px;
+          border-left: 4px solid var(--reservation-btn);
+          position: relative;
+          padding-bottom: 50px; /* Added padding to accommodate bottom button */
+        }
+
+        .feedback-item-global {
+          border-left: 4px solid var(--feedback-btn);
+        }
+
+        .reservation-header-global {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          margin-bottom: 15px;
+        }
+
+        .reservation-customer-info {
+          display: flex;
+          flex-direction: column;
+          gap: 5px;
+        }
+
+        .reservation-customer-name {
+          font-weight: bold;
+          color: var(--accent);
+          font-size: 18px;
+        }
+
+        .reservation-customer-email {
+          font-size: 14px;
+          color: #aaa;
+        }
+
+        .reservation-date-global {
+          font-weight: bold;
+          color: var(--accent);
+          font-size: 16px;
+          text-align: right;
+        }
+
+        .reservation-status {
+          padding: 4px 8px;
+          border-radius: 12px;
+          font-size: 12px;
+          font-weight: bold;
+          display: inline-block;
+          margin-top: 5px;
+        }
+
+        .status-confirmed {
+          background-color: #4CAF50;
+          color: white;
+        }
+
+        .status-pending {
+          background-color: #FFC107;
+          color: #333;
+        }
+
+        .status-cancelled {
+          background-color: #f44336;
+          color: white;
+        }
+
+        .reservation-details-global {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 15px;
+          font-size: 14px;
+        }
+
+        .detail-item {
+          display: flex;
+          flex-direction: column;
+        }
+
+        .detail-label {
+          font-size: 12px;
+          color: #aaa;
+          margin-bottom: 2px;
+        }
+
+        .detail-value {
+          font-weight: bold;
+        }
+
+        .no-data {
+          text-align: center;
+          padding: 60px;
+          color: #aaa;
+          font-style: italic;
+          font-size: 16px;
+          background-color: var(--card-bg);
+          border-radius: 8px;
+        }
+
+        /* Feedback items */
+        .feedback-header-global {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          margin-bottom: 15px;
+        }
+
+        .feedback-customer-info {
+          display: flex;
+          flex-direction: column;
+          gap: 5px;
+        }
+
+        .feedback-customer-name {
+          font-weight: bold;
+          color: var(--accent);
+          font-size: 18px;
+        }
+
+        .feedback-customer-email {
+          font-size: 14px;
+          color: #aaa;
+        }
+
+        .feedback-date-global {
+          font-size: 12px;
+          color: #aaa;
+          text-align: right;
+        }
+
+        .feedback-rating-global {
+          margin-bottom: 15px;
+        }
+
+        .star {
+          color: gold;
+          font-size: 18px;
+        }
+
+        .feedback-text-global {
+          font-size: 15px;
+          line-height: 1.5;
+          color: #ddd;
+          background-color: var(--table-row-even);
+          padding: 15px;
+          border-radius: 6px;
+          border-left: 3px solid var(--feedback-btn);
+        }
+
         /* Responsive table columns */
         @media (max-width: 1200px) {
           .members-table th, .members-table td {
@@ -563,7 +734,7 @@
 
         @media (max-width: 992px) {
           .sidebar {
-            width: 100px;
+            width: 120px;
           }
 
           .sidebar-nav button {
@@ -594,13 +765,13 @@
             height: auto;
             flex-direction: column;
             justify-content: flex-start;
-            padding: 20px;
+            padding: 15px;
           }
 
           .logo-container {
             width: 100px;
             height: 100px;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
           }
 
           .logo {
@@ -609,19 +780,20 @@
           }
 
           .sidebar-nav {
-            flex-direction: column;
-            gap: 15px;
-            width: 100%;
+            flex-direction: row;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
           }
 
           .sidebar-nav button {
-            width: 100%;
-            height: 45px;
-            font-size: 14px;
+            width: 120px;
+            height: 40px;
+            font-size: 12px;
           }
 
           .main {
-            height: calc(100vh - 280px);
+            height: calc(100vh - 200px);
             padding: 15px;
           }
         }
@@ -646,6 +818,7 @@
           border-radius: 6px;
           border-left: 4px solid var(--reservation-btn);
           position: relative;
+          padding-bottom: 50px; /* Added padding to accommodate bottom button */
         }
 
         .reservation-header {
@@ -661,55 +834,11 @@
           font-size: 16px;
         }
 
-        .reservation-status {
-          padding: 4px 8px;
-          border-radius: 12px;
-          font-size: 12px;
-          font-weight: bold;
-        }
-
-        .status-confirmed {
-          background-color: #4CAF50;
-          color: white;
-        }
-
-        .status-pending {
-          background-color: #FFC107;
-          color: #333;
-        }
-
-        .status-cancelled {
-          background-color: #f44336;
-          color: white;
-        }
-
         .reservation-details {
           display: grid;
           grid-template-columns: 1fr 1fr;
           gap: 10px;
           font-size: 14px;
-        }
-
-        .detail-item {
-          display: flex;
-          flex-direction: column;
-        }
-
-        .detail-label {
-          font-size: 12px;
-          color: #aaa;
-          margin-bottom: 2px;
-        }
-
-        .detail-value {
-          font-weight: bold;
-        }
-
-        .no-reservations {
-          text-align: center;
-          padding: 40px;
-          color: #aaa;
-          font-style: italic;
         }
 
         /* Edit Modal */
@@ -752,44 +881,10 @@
           flex-wrap: wrap;
         }
 
-        /* Feedback Modal */
-        .feedback-list {
-          display: flex;
-          flex-direction: column;
-          gap: 15px;
-        }
-
-        .feedback-item {
-          background-color: var(--table-row-even);
-          padding: 15px;
-          border-radius: 6px;
-          border-left: 4px solid var(--feedback-btn);
-        }
-
-        .feedback-date {
-          font-size: 12px;
-          color: #aaa;
-          margin-bottom: 5px;
-        }
-
-        .feedback-rating {
-          margin-bottom: 10px;
-        }
-
-        .star {
-          color: gold;
-          font-size: 16px;
-        }
-
-        .feedback-text {
-          font-size: 14px;
-          line-height: 1.5;
-        }
-
-        /* Reservation Edit Button */
+        /* Reservation Edit Button - MOVED TO BOTTOM RIGHT */
         .reservation-edit-btn {
           position: absolute;
-          top: 10px;
+          bottom: 10px;  /* Changed from top to bottom */
           right: 10px;
           background: none;
           border: none;
@@ -799,6 +894,7 @@
           padding: 5px;
           border-radius: 4px;
           transition: background 0.3s;
+          z-index: 5;
         }
 
         .reservation-edit-btn:hover {
@@ -867,20 +963,23 @@
     </div>
     <div class="sidebar-nav">
         <button class="active" data-section="accounts" title="Customers">
-            ACCOUNTS
+            CUSTOMERS
+        </button>
+        <button data-section="reservations" title="All Reservations">
+            RESERVATIONS
+        </button>
+        <button data-section="feedback" title="All Feedback">
+            FEEDBACK
         </button>
         <button data-section="reports" title="Reports">
             REPORTS
-        </button>
-        <button id="logoutBtn" data-section="logout" title="Logout">
-            LOGOUT
         </button>
     </div>
 </div>
 
 <div class="main" id="mainContent">
-    <!-- Accounts section (default) -->
-    <div id="accountsSection">
+    <!-- Customers section (default) -->
+    <div id="accountsSection" class="accounts-section active">
         <div class="header">
             <div class="header-title">Customers</div>
             <!-- Removed Add Customer button -->
@@ -939,7 +1038,111 @@
         </div>
     </div>
 
-    <!-- Reports section (hidden by default) -->
+    <!-- All Reservations section -->
+    <div id="reservationsSection" class="reservations-section">
+        <div class="header">
+            <div class="header-title">All Reservations</div>
+        </div>
+
+        <div class="search-container" id="reservationsSearchContainer">
+            <input type="text" class="search-bar" id="reservationsSearchBar" placeholder="Search reservations by customer name, date, or table...">
+        </div>
+
+        <div class="filter-container">
+            <div class="filter-title">Filter Reservations</div>
+            <div class="filter-options">
+                <div class="filter-option">
+                    <label for="reservationStatusFilter">Status</label>
+                    <select id="reservationStatusFilter">
+                        <option value="all">All Statuses</option>
+                        <option value="confirmed">Confirmed</option>
+                        <option value="pending">Pending</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                </div>
+                <div class="filter-option">
+                    <label for="reservationDateFilter">Date</label>
+                    <input type="text" id="reservationDateFilter" placeholder="Filter by date...">
+                </div>
+            </div>
+        </div>
+
+        <div class="reservations-list" id="allReservationsList">
+            <!-- All reservations will be inserted here by JavaScript -->
+        </div>
+
+        <div class="stats-container">
+            <div class="stat-item">
+                <div class="stat-value" id="totalReservations">0</div>
+                <div class="stat-label">Total Reservations</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="confirmedReservations">0</div>
+                <div class="stat-label">Confirmed</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="pendingReservations">0</div>
+                <div class="stat-label">Pending</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="cancelledReservations">0</div>
+                <div class="stat-label">Cancelled</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- All Feedback section -->
+    <div id="feedbackSection" class="feedback-section">
+        <div class="header">
+            <div class="header-title">All Customer Feedback</div>
+        </div>
+
+        <div class="search-container" id="feedbackSearchContainer">
+            <input type="text" class="search-bar" id="feedbackSearchBar" placeholder="Search feedback by customer name or feedback text...">
+        </div>
+
+        <div class="filter-container">
+            <div class="filter-title">Filter Feedback</div>
+            <div class="filter-options">
+                <div class="filter-option">
+                    <label for="feedbackRatingFilter">Rating</label>
+                    <select id="feedbackRatingFilter">
+                        <option value="all">All Ratings</option>
+                        <option value="5">★★★★★ (5 stars)</option>
+                        <option value="4">★★★★☆ (4 stars)</option>
+                        <option value="3">★★★☆☆ (3 stars)</option>
+                        <option value="2">★★☆☆☆ (2 stars)</option>
+                        <option value="1">★☆☆☆☆ (1 star)</option>
+                    </select>
+                </div>
+                <div class="filter-option">
+                    <label for="feedbackDateFilter">Date Range</label>
+                    <input type="text" id="feedbackDateFilter" placeholder="Filter by date...">
+                </div>
+            </div>
+        </div>
+
+        <div class="feedback-list-container" id="allFeedbackList">
+            <!-- All feedback will be inserted here by JavaScript -->
+        </div>
+
+        <div class="stats-container">
+            <div class="stat-item">
+                <div class="stat-value" id="totalFeedback">0</div>
+                <div class="stat-label">Total Feedback</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="averageRating">0.0</div>
+                <div class="stat-label">Avg Rating</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="fiveStarFeedback">0</div>
+                <div class="stat-label">5 Star Ratings</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reports section -->
     <div id="reportsSection" class="reports-section">
         <div class="header">
             <div class="header-title">Restaurant Reports</div>
@@ -1084,7 +1287,7 @@
             <div id="currentStatusDisplay" class="current-status-display">
                 <!-- Current status will be displayed here -->
             </div>
-            
+
             <div class="form-row">
                 <div class="form-group">
                     <label for="editReservationDate">Date</label>
@@ -1219,7 +1422,8 @@
               "The staff remembered our anniversary!"
             ];
             feedback.push({
-              date: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toLocaleDateString(),
+              id: f + 1,
+              date: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
               rating: rating,
               text: feedbackTypes[Math.floor(Math.random() * feedbackTypes.length)]
             });
@@ -1268,8 +1472,18 @@
             }
           ],
           feedback: [
-            { date: '2024-01-15', rating: 5, text: 'Excellent service as always!' },
-            { date: '2024-02-20', rating: 4, text: 'The new menu items are fantastic.' }
+            {
+              id: 1,
+              date: 'January 15, 2024',
+              rating: 5,
+              text: 'Excellent service as always!'
+            },
+            {
+              id: 2,
+              date: 'February 20, 2024',
+              rating: 4,
+              text: 'The new menu items are fantastic.'
+            }
           ],
           notes: 'VIP customer, prefers table by the window',
           joinDate: '2023-01-15'
@@ -1292,7 +1506,12 @@
             }
           ],
           feedback: [
-            { date: '2024-02-28', rating: 5, text: 'Perfect anniversary dinner!' }
+            {
+              id: 1,
+              date: 'February 28, 2024',
+              rating: 5,
+              text: 'Perfect anniversary dinner!'
+            }
           ],
           notes: '',
           joinDate: '2023-11-20'
@@ -1305,10 +1524,35 @@
     // Elements
     const sidebarButtons = document.querySelectorAll('.sidebar-nav button');
     const accountsSection = document.getElementById('accountsSection');
+    const reservationsSection = document.getElementById('reservationsSection');
+    const feedbackSection = document.getElementById('feedbackSection');
     const reportsSection = document.getElementById('reportsSection');
     const membersTableBody = document.getElementById('membersTableBody');
     const searchContainer = document.getElementById('searchContainer');
     const searchBar = document.querySelector('.search-bar');
+
+    // Reservations section elements
+    const allReservationsList = document.getElementById('allReservationsList');
+    const reservationsSearchContainer = document.getElementById('reservationsSearchContainer');
+    const reservationsSearchBar = document.getElementById('reservationsSearchBar');
+    const reservationStatusFilter = document.getElementById('reservationStatusFilter');
+    const reservationDateFilter = document.getElementById('reservationDateFilter');
+    const totalReservationsElement = document.getElementById('totalReservations');
+    const confirmedReservationsElement = document.getElementById('confirmedReservations');
+    const pendingReservationsElement = document.getElementById('pendingReservations');
+    const cancelledReservationsElement = document.getElementById('cancelledReservations');
+
+    // Feedback section elements
+    const allFeedbackList = document.getElementById('allFeedbackList');
+    const feedbackSearchContainer = document.getElementById('feedbackSearchContainer');
+    const feedbackSearchBar = document.getElementById('feedbackSearchBar');
+    const feedbackRatingFilter = document.getElementById('feedbackRatingFilter');
+    const feedbackDateFilter = document.getElementById('feedbackDateFilter');
+    const totalFeedbackElement = document.getElementById('totalFeedback');
+    const averageRatingElement = document.getElementById('averageRating');
+    const fiveStarFeedbackElement = document.getElementById('fiveStarFeedback');
+
+    // Other elements
     const deleteOverlay = document.getElementById('deleteOverlay');
     const deleteAccountName = document.getElementById('deleteAccountName');
     const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
@@ -1359,7 +1603,7 @@
     let currentPage = 1;
     let itemsPerPage = 20;
     let filteredMembers = [];
-    
+
     // Variables for reservation editing
     let currentReservationMember = null;
     let currentReservation = null;
@@ -1385,6 +1629,59 @@
 
       todayReservationsElement.textContent = todayCount;
       tomorrowReservationsElement.textContent = tomorrowCount;
+
+      // Update reservations stats
+      updateReservationsStats();
+
+      // Update feedback stats
+      updateFeedbackStats();
+    }
+
+    // Function to update reservations stats
+    function updateReservationsStats() {
+      let total = 0;
+      let confirmed = 0;
+      let pending = 0;
+      let cancelled = 0;
+
+      membersData.forEach(member => {
+        total += member.reservations.length;
+        member.reservations.forEach(reservation => {
+          if (reservation.status === 'confirmed') confirmed++;
+          if (reservation.status === 'pending') pending++;
+          if (reservation.status === 'cancelled') cancelled++;
+        });
+      });
+
+      totalReservationsElement.textContent = total;
+      confirmedReservationsElement.textContent = confirmed;
+      pendingReservationsElement.textContent = pending;
+      cancelledReservationsElement.textContent = cancelled;
+    }
+
+    // Function to update feedback stats
+    function updateFeedbackStats() {
+      let total = 0;
+      let totalRating = 0;
+      let fiveStar = 0;
+
+      membersData.forEach(member => {
+        total += member.feedback.length;
+        member.feedback.forEach(fb => {
+          totalRating += fb.rating;
+          if (fb.rating === 5) fiveStar++;
+        });
+      });
+
+      totalFeedbackElement.textContent = total;
+      fiveStarFeedbackElement.textContent = fiveStar;
+
+      if (total > 0) {
+        const average = (totalRating / total).toFixed(1);
+        averageRatingElement.textContent = average;
+      } else {
+        averageRatingElement.textContent = '0.0';
+      }
     }
 
     // Function to filter members
@@ -1456,6 +1753,181 @@
       updateStats();
     }
 
+    // Function to render all reservations
+    function renderAllReservations() {
+      // Collect all reservations from all customers
+      let allReservations = [];
+      membersData.forEach(member => {
+        member.reservations.forEach(reservation => {
+          allReservations.push({
+            ...reservation,
+            customerName: member.name,
+            customerEmail: member.email,
+            customerId: member.id
+          });
+        });
+      });
+
+      // Apply filters
+      let filteredReservations = allReservations;
+
+      // Status filter
+      const statusFilterValue = reservationStatusFilter.value;
+      if (statusFilterValue !== 'all') {
+        filteredReservations = filteredReservations.filter(res => res.status === statusFilterValue);
+      }
+
+      // Date filter
+      const dateFilterValue = reservationDateFilter.value.toLowerCase();
+      if (dateFilterValue) {
+        filteredReservations = filteredReservations.filter(res =>
+          res.date.toLowerCase().includes(dateFilterValue)
+        );
+      }
+
+      // Search bar filter
+      const searchValue = reservationsSearchBar.value.toLowerCase();
+      if (searchValue) {
+        filteredReservations = filteredReservations.filter(res =>
+          res.customerName.toLowerCase().includes(searchValue) ||
+          res.date.toLowerCase().includes(searchValue) ||
+          res.table.toLowerCase().includes(searchValue) ||
+          res.customerEmail.toLowerCase().includes(searchValue)
+        );
+      }
+
+      // Sort by date (most recent first)
+      filteredReservations.sort((a, b) => {
+        // Simple string comparison for demo - in real app you'd parse dates
+        return b.date.localeCompare(a.date);
+      });
+
+      // Generate HTML
+      if (filteredReservations.length > 0) {
+        const reservationsHTML = filteredReservations.map(res => {
+          const statusClass = `status-${res.status}`;
+          return `
+          <div class="reservation-item-global">
+            <div class="reservation-header-global">
+              <div class="reservation-customer-info">
+                <div class="reservation-customer-name">${res.customerName}</div>
+                <div class="reservation-customer-email">${res.customerEmail}</div>
+              </div>
+              <div>
+                <div class="reservation-date-global">${res.date}</div>
+                <div class="reservation-status ${statusClass}">${res.status}</div>
+              </div>
+            </div>
+            <div class="reservation-details-global">
+              <div class="detail-item">
+                <span class="detail-label">Time</span>
+                <span class="detail-value">${res.time}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Party Size</span>
+                <span class="detail-value">${res.partySize} people</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Table</span>
+                <span class="detail-value">${res.table}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Contact</span>
+                <span class="detail-value">${res.contactPhone}</span>
+              </div>
+            </div>
+            ${res.specialRequests ? `<div style="margin-top: 15px; font-size: 14px;"><strong>Special Requests:</strong> ${res.specialRequests}</div>` : ''}
+            <button class="reservation-edit-btn" onclick="editReservation(${res.customerId}, ${res.id})" title="Edit Reservation">✏️</button>
+          </div>
+        `}).join('');
+
+        allReservationsList.innerHTML = reservationsHTML;
+      } else {
+        allReservationsList.innerHTML = '<div class="no-data">No reservations found</div>';
+      }
+
+      // Update stats
+      updateReservationsStats();
+    }
+
+    // Function to render all feedback
+    function renderAllFeedback() {
+      // Collect all feedback from all customers
+      let allFeedback = [];
+      membersData.forEach(member => {
+        member.feedback.forEach(feedback => {
+          allFeedback.push({
+            ...feedback,
+            customerName: member.name,
+            customerEmail: member.email,
+            customerId: member.id
+          });
+        });
+      });
+
+      // Apply filters
+      let filteredFeedback = allFeedback;
+
+      // Rating filter
+      const ratingFilterValue = feedbackRatingFilter.value;
+      if (ratingFilterValue !== 'all') {
+        filteredFeedback = filteredFeedback.filter(fb => fb.rating === parseInt(ratingFilterValue));
+      }
+
+      // Date filter
+      const dateFilterValue = feedbackDateFilter.value.toLowerCase();
+      if (dateFilterValue) {
+        filteredFeedback = filteredFeedback.filter(fb =>
+          fb.date.toLowerCase().includes(dateFilterValue)
+        );
+      }
+
+      // Search bar filter
+      const searchValue = feedbackSearchBar.value.toLowerCase();
+      if (searchValue) {
+        filteredFeedback = filteredFeedback.filter(fb =>
+          fb.customerName.toLowerCase().includes(searchValue) ||
+          fb.text.toLowerCase().includes(searchValue) ||
+          fb.customerEmail.toLowerCase().includes(searchValue)
+        );
+      }
+
+      // Sort by date (most recent first)
+      filteredFeedback.sort((a, b) => {
+        // Simple string comparison for demo - in real app you'd parse dates
+        return new Date(b.date) - new Date(a.date);
+      });
+
+      // Generate HTML
+      if (filteredFeedback.length > 0) {
+        const feedbackHTML = filteredFeedback.map(fb => {
+          const stars = '★'.repeat(fb.rating) + '☆'.repeat(5 - fb.rating);
+          return `
+          <div class="feedback-item-global">
+            <div class="feedback-header-global">
+              <div class="feedback-customer-info">
+                <div class="feedback-customer-name">${fb.customerName}</div>
+                <div class="feedback-customer-email">${fb.customerEmail}</div>
+              </div>
+              <div class="feedback-date-global">${fb.date}</div>
+            </div>
+            <div class="feedback-rating-global">
+              <span class="star">${stars}</span>
+              <span style="margin-left: 10px; font-size: 14px;">${fb.rating}/5</span>
+            </div>
+            <div class="feedback-text-global">${fb.text}</div>
+          </div>
+        `}).join('');
+
+        allFeedbackList.innerHTML = feedbackHTML;
+      } else {
+        allFeedbackList.innerHTML = '<div class="no-data">No feedback found</div>';
+      }
+
+      // Update stats
+      updateFeedbackStats();
+    }
+
     function showReservations(memberId) {
       const member = membersData.find(m => m.id === memberId);
       if (member) {
@@ -1466,7 +1938,6 @@
             const statusClass = `status-${res.status}`;
             return `
             <div class="reservation-item">
-              <button class="reservation-edit-btn" onclick="editReservation(${member.id}, ${res.id})" title="Edit Reservation">✏️</button>
               <div class="reservation-header">
                 <div class="reservation-date">${res.date}</div>
                 <div class="reservation-status ${statusClass}">${res.status}</div>
@@ -1490,6 +1961,7 @@
                 </div>
               </div>
               ${res.specialRequests ? `<div style="margin-top: 10px; font-size: 14px;"><strong>Special Requests:</strong> ${res.specialRequests}</div>` : ''}
+              <button class="reservation-edit-btn" onclick="editReservation(${member.id}, ${res.id})" title="Edit Reservation">✏️</button>
             </div>
           `}).join('');
 
@@ -1514,11 +1986,11 @@
         if (reservation) {
           currentReservation = reservation;
           reservationEditTitle.textContent = `Edit Reservation for ${member.name}`;
-          
+
           // Update current status display
           const statusText = reservation.status.charAt(0).toUpperCase() + reservation.status.slice(1);
           currentStatusDisplay.innerHTML = `Current Status: <span class="status-${reservation.status}-display">${statusText}</span>`;
-          
+
           // Fill form fields
           editReservationDate.value = reservation.date;
           editReservationTime.value = reservation.time;
@@ -1527,7 +1999,7 @@
           editReservationStatus.value = reservation.status;
           editReservationSpecialRequests.value = reservation.specialRequests || '';
           editReservationContactPhone.value = reservation.contactPhone;
-          
+
           reservationEditOverlay.style.display = 'flex';
         }
       }
@@ -1654,13 +2126,18 @@
         // Set status to cancelled
         currentReservation.status = 'cancelled';
         editReservationStatus.value = 'cancelled';
-        
+
         // Update status display
         currentStatusDisplay.innerHTML = `Current Status: <span class="status-cancelled-display">Cancelled</span>`;
-        
+
         // Save the change
         saveReservationChanges();
-        
+
+        // Refresh all reservations view if we're on that page
+        if (reservationsSection.classList.contains('active')) {
+          renderAllReservations();
+        }
+
         alert('Reservation has been cancelled!');
       }
     }
@@ -1675,9 +2152,17 @@
         currentReservation.status = editReservationStatus.value;
         currentReservation.specialRequests = editReservationSpecialRequests.value;
         currentReservation.contactPhone = editReservationContactPhone.value;
-        
+
         // Refresh the reservations modal to show updated data
-        showReservations(currentReservationMember.id);
+        if (reservationsOverlay.style.display === 'flex') {
+          showReservations(currentReservationMember.id);
+        }
+
+        // Refresh all reservations view if we're on that page
+        if (reservationsSection.classList.contains('active')) {
+          renderAllReservations();
+        }
+
         reservationEditOverlay.style.display = 'none';
       }
     }
@@ -1689,6 +2174,15 @@
         if (index !== -1) {
           membersData.splice(index, 1);
           renderMembersTable();
+
+          // Refresh other views if they're active
+          if (reservationsSection.classList.contains('active')) {
+            renderAllReservations();
+          }
+          if (feedbackSection.classList.contains('active')) {
+            renderAllFeedback();
+          }
+
           alert(`Customer ${currentMember.name} deleted`);
         }
       }
@@ -1705,10 +2199,19 @@
     saveEditBtn.addEventListener('click', () => {
       if (currentMember) {
         const newName = editCustomerName.value.trim();
-        
+
         if (newName && newName !== '') {
           currentMember.name = newName;
           renderMembersTable();
+
+          // Refresh other views if they're active
+          if (reservationsSection.classList.contains('active')) {
+            renderAllReservations();
+          }
+          if (feedbackSection.classList.contains('active')) {
+            renderAllFeedback();
+          }
+
           alert(`Customer information updated`);
         }
       }
@@ -1788,7 +2291,7 @@
       }
     });
 
-    // Filter event listeners
+    // Filter event listeners for customers
     nameFilter.addEventListener('input', () => {
       currentPage = 1;
       renderMembersTable();
@@ -1798,6 +2301,32 @@
       nameFilter.value = searchBar.value;
       currentPage = 1;
       renderMembersTable();
+    });
+
+    // Filter event listeners for reservations
+    reservationsSearchBar.addEventListener('input', () => {
+      renderAllReservations();
+    });
+
+    reservationStatusFilter.addEventListener('change', () => {
+      renderAllReservations();
+    });
+
+    reservationDateFilter.addEventListener('input', () => {
+      renderAllReservations();
+    });
+
+    // Filter event listeners for feedback
+    feedbackSearchBar.addEventListener('input', () => {
+      renderAllFeedback();
+    });
+
+    feedbackRatingFilter.addEventListener('change', () => {
+      renderAllFeedback();
+    });
+
+    feedbackDateFilter.addEventListener('input', () => {
+      renderAllFeedback();
     });
 
     // Pagination event listeners
@@ -1831,14 +2360,30 @@
 
         const section = btn.getAttribute('data-section');
 
+        // Hide all sections
+        accountsSection.classList.remove('active');
+        reservationsSection.classList.remove('active');
+        feedbackSection.classList.remove('active');
+        reportsSection.classList.remove('active');
+
+        // Hide all search containers
+        searchContainer.style.display = 'none';
+        reservationsSearchContainer.style.display = 'none';
+        feedbackSearchContainer.style.display = 'none';
+
         if (section === 'accounts') {
-          accountsSection.style.display = 'block';
-          reportsSection.style.display = 'none';
+          accountsSection.classList.add('active');
           searchContainer.style.display = 'block';
+        } else if (section === 'reservations') {
+          reservationsSection.classList.add('active');
+          reservationsSearchContainer.style.display = 'block';
+          renderAllReservations();
+        } else if (section === 'feedback') {
+          feedbackSection.classList.add('active');
+          feedbackSearchContainer.style.display = 'block';
+          renderAllFeedback();
         } else if (section === 'reports') {
-          accountsSection.style.display = 'none';
-          reportsSection.style.display = 'block';
-          searchContainer.style.display = 'none';
+          reportsSection.classList.add('active');
         }
       });
     });
@@ -1846,14 +2391,20 @@
     // Initialize
     updateStats();
     renderMembersTable();
-    reportsSection.style.display = 'none';
-    searchContainer.style.display = 'block';
+    renderAllReservations();
+    renderAllFeedback();
+
+    // Initially hide other sections
+    reservationsSection.classList.remove('active');
+    feedbackSection.classList.remove('active');
+    reportsSection.classList.remove('active');
+    reservationsSearchContainer.style.display = 'none';
+    feedbackSearchContainer.style.display = 'none';
 
     // Log restaurant stats
     console.log(`Eden's Table Restaurant Stats:`);
     console.log(`Total customers: ${membersData.length}`);
 </script>
 
-    <script src="manager-dashboard-api.js"></script>
 </body>
 </html>
